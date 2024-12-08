@@ -16,6 +16,8 @@ Linux (possibly UNIX) only
 - `clangd` [LLVM]
     - add support for syntax completion
 
+![](res/extensions.png)
+
 ## Build Commands
 
 Commands in chronologic order
@@ -49,6 +51,8 @@ cmake --build .
 ```
 
 Set a breakpoint on an arbitrary nonempty line inside a function's body. Then run a debugger with `F5`. The debugger launches the executable, attaches to it, and the execution halts at the breakpoint.
+
+The autocompletion and `Ctrl + click`/`F12` reference resolution works after first configuration/generation of the project. The clangd picks up the generated `compile_commands.json` from the `build` directory and starts completing with `Ctrl + Space`.
 
 ## What would an absolute minimal CMake C++ project look like in VSCode with clangd IntelliSense autocompletion and debugging support?
 

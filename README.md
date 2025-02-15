@@ -49,25 +49,19 @@ The absolute path to the repository directory will be printed.
 ```
 cd "${PATH_TO_REPO}"
 DEBUG_BUILD_DIR_NAME="build-Debug"
-rm --recursive "${DEBUG_BUILD_DIR_NAME}"
+echo "${DEBUG_BUILD_DIR_NAME}"
+rm --verbose --recursive "${DEBUG_BUILD_DIR_NAME}"
 mkdir "${DEBUG_BUILD_DIR_NAME}"
 cd "${DEBUG_BUILD_DIR_NAME}"
-cmake -DCMAKE_BUILD_TYPE=Debug ..
-cmake --build .
-```
-
-```
-mkdir build
-cd build
 pwd
 ls
+ls ..
 cmake -DCMAKE_BUILD_TYPE=Debug ..
 cmake --build .
 ls
 ldd my_cpp_project
 ```
 
-Set a breakpoint on an arbitrary nonempty line inside a function's body. Then run a debugger with `F5`. The debugger launches the executable, attaches to it, and the execution halts at the breakpoint.
 
 **Incremental Debug Build One-Liner**
 
@@ -75,26 +69,23 @@ Set a breakpoint on an arbitrary nonempty line inside a function's body. Then ru
 date && cd "${PATH_TO_REPO}/${DEBUG_BUILD_DIR_NAME}" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . && ./my_cpp_project
 ```
 
+Set a breakpoint on an arbitrary nonempty line inside a function's body. Then run a debugger with `F5`. The debugger launches the executable, attaches to it, and the execution halts at the breakpoint.
+
 ### Release
 
 ```
 cd "${PATH_TO_REPO}"
 RELEASE_BUILD_DIR_NAME="build-Release"
-rm --recursive "${RELEASE_BUILD_DIR_NAME}"
+echo "${RELEASE_BUILD_DIR_NAME}"
+rm --verbose --recursive "${RELEASE_BUILD_DIR_NAME}"
 mkdir "${RELEASE_BUILD_DIR_NAME}"
 cd "${RELEASE_BUILD_DIR_NAME}"
-cmake -DCMAKE_BUILD_TYPE=Release ..
-cmake --build .
-```
-
-```
-mkdir build
-cd build-release
 pwd
-cmake ..
 ls
 ls ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build .
+ls
 ```
 
 **Incremental Release Build One-Liner**
@@ -106,6 +97,10 @@ date && cd "${PATH_TO_REPO}/${RELEASE_BUILD_DIR_NAME}" && cmake -DCMAKE_BUILD_TY
 Notes
 
 The autocompletion and `Ctrl + click`/`F12` reference resolution works after first configuration/generation of the project. The clangd picks up the generated `compile_commands.json` from the `build` directory and starts completing with `Ctrl + Space`.
+
+## VCS
+
+`date && git branch && git status && git diff`
 
 ## What would an absolute minimal CMake C++ project look like in VSCode with clangd IntelliSense autocompletion and debugging support?
 

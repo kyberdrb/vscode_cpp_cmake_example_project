@@ -1,14 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
 
-# Project name and version
-project(MyCppProject VERSION 1.0)
+project(MyCppProject VERSION 1.0) # Project name and version
 
-# Specify C++ standard
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # Enable gneeration of 'compile_commands.json' file for clangd autocompletion and referencing
 
-# Specify the source file to compile
+message("CMAKE_BUILD_TYPE=" ${CMAKE_BUILD_TYPE})
+
+# Specify the source files for compilation
 add_executable(my_cpp_project src/main.cpp)
 
-# Enable compile_commands.json generation for clangd
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

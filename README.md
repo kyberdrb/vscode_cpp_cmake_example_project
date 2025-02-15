@@ -22,10 +22,74 @@ Linux (possibly UNIX) only
 
 Commands in chronologic order
 
-### Build & Run
+### Build
+
+Set path to repo
 
 ```
-mkdir build && cd build
+PATH_TO_REPO="/path/to/repo"
+```
+
+or if already present in the repo dir
+
+```
+PATH_TO_REPO="$(pwd)"
+```
+
+Verify
+
+```
+echo ${PATH_TO_REPO}
+```
+
+The absolute path to the repository directory will be printed.
+
+### Debug
+
+```
+cd "${PATH_TO_REPO}"
+DEBUG_BUILD_DIR_NAME="build-Debug"
+rm --recursive "${DEBUG_BUILD_DIR_NAME}"
+mkdir "${DEBUG_BUILD_DIR_NAME}"
+cd "${DEBUG_BUILD_DIR_NAME}"
+cmake -DCMAKE_BUILD_TYPE=Debug ..
+cmake --build .
+```
+
+```
+mkdir build
+cd build
+pwd
+ls
+cmake -DCMAKE_BUILD_TYPE=Debug ..
+cmake --build .
+ls
+ldd my_cpp_project
+```
+
+Set a breakpoint on an arbitrary nonempty line inside a function's body. Then run a debugger with `F5`. The debugger launches the executable, attaches to it, and the execution halts at the breakpoint.
+
+**Incremental Debug Build One-Liner**
+
+```
+date && cd "${PATH_TO_REPO}/${DEBUG_BUILD_DIR_NAME}" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . && ./my_cpp_project
+```
+
+### Release
+
+```
+cd "${PATH_TO_REPO}"
+RELEASE_BUILD_DIR_NAME="build-Release"
+rm --recursive "${RELEASE_BUILD_DIR_NAME}"
+mkdir "${RELEASE_BUILD_DIR_NAME}"
+cd "${RELEASE_BUILD_DIR_NAME}"
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build .
+```
+
+```
+mkdir build
+cd build-release
 pwd
 cmake ..
 ls
@@ -33,24 +97,13 @@ ls ..
 cmake --build .
 ```
 
-### Build & Debug
+**Incremental Release Build One-Liner**
 
 ```
-mkdir build && cd build
-pwd
-cmake ..
-ls -l /usr/bin/gdb
-whereis gdb
-gdb
-gdb --version
-ls
-ldd my_cpp_project 
-cmake --build .
-cmake -DCMAKE_BUILD_TYPE=Debug ..
-cmake --build .
+date && cd "${PATH_TO_REPO}/${RELEASE_BUILD_DIR_NAME}" && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . && ./my_cpp_project
 ```
 
-Set a breakpoint on an arbitrary nonempty line inside a function's body. Then run a debugger with `F5`. The debugger launches the executable, attaches to it, and the execution halts at the breakpoint.
+Notes
 
 The autocompletion and `Ctrl + click`/`F12` reference resolution works after first configuration/generation of the project. The clangd picks up the generated `compile_commands.json` from the `build` directory and starts completing with `Ctrl + Space`.
 

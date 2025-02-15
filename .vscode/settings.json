@@ -2,8 +2,14 @@
     "files.associations": {
         "CMakeLists.txt": "cmake"
     },
+    
     "C_Cpp.intelliSenseEngine": "disabled",  // Disable IntelliSense from Microsoft C/C++ extension in favor of clangd
+    
     "clangd.arguments": [
         "--compile-commands-dir=build"       // Tell clangd to use compile_commands.json from build directory
-    ]
+    ],
+
+    "cmake.configureOnOpen": false,
+    "cmake.configureOnEdit": false,
+    "cmake.automaticReconfigure": false
 }

@@ -5,7 +5,7 @@ project(MyCppProject VERSION 1.0)
 
 # Specify C++ standard
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Specify the source file to compile
 add_executable(my_cpp_project src/main.cpp)

@@ -10,4 +10,3 @@ message("CMAKE_BUILD_TYPE=" ${CMAKE_BUILD_TYPE})
 
 # Specify the source files for compilation
 add_executable(my_cpp_project src/main.cpp)
-

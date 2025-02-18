@@ -1,3 +1,9 @@
 CompileFlags:
-  Add: 
+  Add:
     - -std=c++23
+    - -D__cpp_concepts=202002L  # Force required macro value
+    - --gcc-toolchain=/usr  # Point to GCC 14 installation
+    - -isystem/usr/include/c++/14.2.1
+    - -isystem/usr/include/c++/14.2.1/x86_64-pc-linux-gnu
+  Remove:
+    - -stdlib=libc++  # Explicitly disable LLVM's stdlib

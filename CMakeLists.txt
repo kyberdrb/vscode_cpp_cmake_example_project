@@ -8,5 +8,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # Enable gneeration of 'compile_commands.j
 
 message("CMAKE_BUILD_TYPE=" ${CMAKE_BUILD_TYPE})
 
-# Specify the source files for compilation
+# TODO generate .clangd from .clangd.in template file
+
 add_executable(my_cpp_project src/main.cpp)

@@ -24,22 +24,22 @@ Commands in chronologic order
 
 ### Build
 
-Set path to repo
-
-```
-PATH_TO_REPO="/path/to/repo"
-```
-
-or if already present in the repo dir
+Set path to repo and executable name. Assuming we're already in the repo dir.
 
 ```
 PATH_TO_REPO="$(pwd)"
+EXECUTABLE_NAME="my_cpp_project"
+DEBUG_BUILD_DIR_NAME="build-Debug"
+RELEASE_BUILD_DIR_NAME="build-Release"
 ```
 
 Verify
 
 ```
 echo ${PATH_TO_REPO}
+echo ${EXECUTABLE_NAME}
+echo ${DEBUG_BUILD_DIR_NAME}
+echo ${RELEASE_BUILD_DIR_NAME}
 ```
 
 The absolute path to the repository directory will be printed.
@@ -48,8 +48,6 @@ The absolute path to the repository directory will be printed.
 
 ```
 cd "${PATH_TO_REPO}"
-DEBUG_BUILD_DIR_NAME="build-Debug"
-echo "${DEBUG_BUILD_DIR_NAME}"
 rm --verbose --recursive "${DEBUG_BUILD_DIR_NAME}"
 mkdir "${DEBUG_BUILD_DIR_NAME}"
 cd "${DEBUG_BUILD_DIR_NAME}"
@@ -59,14 +57,14 @@ ls ..
 cmake -DCMAKE_BUILD_TYPE=Debug ..
 cmake --build .
 ls
-ldd my_cpp_project
+ldd ${EXECUTABLE_NAME}
 ```
 
 
 **Incremental Debug Build One-Liner**
 
 ```
-date && cd "${PATH_TO_REPO}/${DEBUG_BUILD_DIR_NAME}" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . && ./my_cpp_project
+date && cd "${PATH_TO_REPO}/${DEBUG_BUILD_DIR_NAME}" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . && ./${EXECUTABLE_NAME}
 ```
 
 Set a breakpoint on an arbitrary nonempty line inside a function's body. Then run a debugger with `F5`. The debugger launches the executable, attaches to it, and the execution halts at the breakpoint.
@@ -75,8 +73,6 @@ Set a breakpoint on an arbitrary nonempty line inside a function's body. Then ru
 
 ```
 cd "${PATH_TO_REPO}"
-RELEASE_BUILD_DIR_NAME="build-Release"
-echo "${RELEASE_BUILD_DIR_NAME}"
 rm --verbose --recursive "${RELEASE_BUILD_DIR_NAME}"
 mkdir "${RELEASE_BUILD_DIR_NAME}"
 cd "${RELEASE_BUILD_DIR_NAME}"
@@ -91,16 +87,39 @@ ls
 **Incremental Release Build One-Liner**
 
 ```
-date && cd "${PATH_TO_REPO}/${RELEASE_BUILD_DIR_NAME}" && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . && ./my_cpp_project
+date && cd "${PATH_TO_REPO}/${RELEASE_BUILD_DIR_NAME}" && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . && ./${EXECUTABLE_NAME}
 ```
 
-Notes
+## Notes
 
 The autocompletion and `Ctrl + click`/`F12` reference resolution works after first configuration/generation of the project. The clangd picks up the generated `compile_commands.json` from the `build` directory and starts completing with `Ctrl + Space`.
 
 ## VCS
 
+Check repo status
+
 `date && git branch && git status && git diff`
+
+## Project structure
+
+```
+my_cpp_project/
+├── .vscode/
+│   ├── settings.json    # For clangd configuration and IntelliSense
+│   ├── launch.json      # For debugging configuration
+├── src/                 # Directory for source files
+│   └── main.cpp         # Main source file - the entry point
+├── build-Debug/         # For configuring Clangd language server
+│   └── my_cpp_project   # Built binary for Debug version
+├── build-Release/       # For configuring Clangd language server
+│   └── my_cpp_project   # Built binary for Release version
+├── .clangd              # For configuring Clangd language server
+├── .gitignore           # For ommitting generated/compiled files
+├── CMakeLists.txt       # CMake build configuration
+└── README.md            # Project description, build instructions
+```
+
+---
 
 ## What would an absolute minimal CMake C++ project look like in VSCode with clangd IntelliSense autocompletion and debugging support?
 

@@ -2,17 +2,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Launch",
-            "type": "cppdbg",
+            "name": "Run debugging on Linux platforms",
+            "type": "cppdbg", // "cppvsdbg" for Windows
             "request": "launch",
-            "program": "${workspaceFolder}/build/my_cpp_project",  // Location of the compiled executable
+            "program": "${workspaceFolder}/build/my_cpp_project", // Location of the compiled executable
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            "miDebuggerPath": "/usr/bin/gdb",                      // Path to GDB
+            "miDebuggerPath": "/usr/bin/gdb", // Path to GDB
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
@@ -20,6 +20,12 @@
                     "ignoreFailures": true
                 }
             ]
+        },
+        {
+            "name": "Run debugging on Windows platforms",
+            "type": "cppvsdbg",
+            "request": "attach", // or "launch" for direct startup
+            "processId": "${command:pickProcess}"
         }
     ]
 }

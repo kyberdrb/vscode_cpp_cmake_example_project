@@ -6,6 +6,8 @@ Building with GCC compiler, GDB debugger
 
 Linux (possibly UNIX) only
 
+Tested on Arch Linux with GCC 14.2.1
+
 ## Extensions Installed
 
 - `C/C++` [Microsoft]
@@ -26,7 +28,8 @@ Commands in chronologic order
 
 Set path to repo and executable name. Assuming we're already in the repo dir.
 
-```
+```sh
+cd /path/to/repo
 PATH_TO_REPO="$(pwd)"
 EXECUTABLE_NAME="my_cpp_project"
 DEBUG_BUILD_DIR_NAME="build-Debug"
@@ -35,7 +38,7 @@ RELEASE_BUILD_DIR_NAME="build-Release"
 
 Verify
 
-```
+```sh
 echo ${PATH_TO_REPO}
 echo ${EXECUTABLE_NAME}
 echo ${DEBUG_BUILD_DIR_NAME}
@@ -46,7 +49,7 @@ The absolute path to the repository directory will be printed.
 
 ### Debug
 
-```
+```sh
 cd "${PATH_TO_REPO}"
 rm --verbose --recursive "${DEBUG_BUILD_DIR_NAME}"
 mkdir "${DEBUG_BUILD_DIR_NAME}"
@@ -60,7 +63,6 @@ ls
 ldd ${EXECUTABLE_NAME}
 ```
 
-
 **Incremental Debug Build One-Liner**
 
 ```
@@ -71,7 +73,7 @@ Set a breakpoint on an arbitrary nonempty line inside a function's body. Then ru
 
 ### Release
 
-```
+```sh
 cd "${PATH_TO_REPO}"
 rm --verbose --recursive "${RELEASE_BUILD_DIR_NAME}"
 mkdir "${RELEASE_BUILD_DIR_NAME}"

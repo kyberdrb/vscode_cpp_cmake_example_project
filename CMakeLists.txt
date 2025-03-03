@@ -10,4 +10,6 @@ message("CMAKE_BUILD_TYPE=" ${CMAKE_BUILD_TYPE})
 
 add_executable(my_cpp_project
     src/main.cpp
+    src/FluentBuilder.h
+    src/FluentBuilder.cpp
 )

@@ -1,3 +1,4 @@
+# TODO generate .clangd from .clangd.in template file
 CompileFlags:
   Add:
     - -std=c++23 # Specify latest stable language version of the standard library

@@ -110,6 +110,63 @@ int main() {
     executionTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     std::println("std::print (execution time): {}", executionTime);
 
+    std::println();
+
+    std::println(
+        "{}/{}/{}", 
+        std::chrono::year(), 
+        std::chrono::month(), 
+        std::chrono::day()
+    );
+
+    std::println("{:%Y/%m/%d}", std::chrono::system_clock::now());
+
+    auto currentTimepoint = std::chrono::system_clock::now();
+    // auto currentTime = std::chrono::steady_clock::now();
+    auto date = std::chrono::year_month_day{
+        std::chrono::floor<std::chrono::days>(currentTimepoint)
+    };
+
+    std::println(
+        "{}/{:02}/{}", 
+        date.year(), 
+        date.month().operator unsigned(), 
+        date.day()
+    );
+
+    std::println("{:%Y/%m/%d}", date);
+    //constexpr
+    auto yearMonthDay{std::format("{:%Y/%m/%d}", date)};
+    std::println("{}", yearMonthDay);
+
+    auto currentTimepointInCurrentTimezone = std::chrono::zoned_time{std::chrono::current_zone(), currentTimepoint};
+    std::println("{:%Y/%m/%d}", currentTimepointInCurrentTimezone.get_local_time()); 
+
+    // Type-safe date construction
+    constexpr auto thanksgiving = std::chrono::year(2025)/11/27;
+    std::println("Thanksgiving: {:%Y/%m/%d}", thanksgiving);
+
+    // Formatting for column alignment with the next line
+    std::println("{:<23}{:%Y/%m/%d}", "Thanksgiving:", thanksgiving);
+
+    // Intuitive way, but doesn't work - maybe make own 'std::date' class as a proposal for 'intuitive' way of working with date and time
+    // auto thanksgiving = std::chrono::year_month_day{"2025/11/27"};
+    // std::println("Thanksgiving: {:%Y/%m/%d}", thanksgiving);
+
+    // Proper parsing from string
+    std::istringstream iss{"2025/10/13"};
+    std::chrono::year_month_day canadianThanksgiving;
+    iss >> std::chrono::parse("%Y/%m/%d", canadianThanksgiving);
+
+    // Safer production version with error checking
+    if(iss.fail()) {
+        std::println("Failed to parse date!");
+        return 1;
+    }
+
+    // Verified output
+    std::println("Canadian Thanksgiving: {:%Y/%m/%d}", canadianThanksgiving);
+
     std::println("EOF");
 
     return 0;

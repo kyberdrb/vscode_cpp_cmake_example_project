@@ -6,7 +6,7 @@
             "name": "Run debugging on Linux platforms",
             "type": "cppdbg", // "cppvsdbg" for Windows
             "request": "launch",
-            "program": "${workspaceFolder}/build/my_cpp_project", // Location of the compiled executable
+            "program": "${workspaceFolder}/build-Debug/my_cpp_project", // Location of the compiled executable
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

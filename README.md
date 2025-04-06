@@ -16,7 +16,7 @@ Tested on Arch Linux with GCC 14.2.1
     - adds support for CMake syntax completion & highlighting
     - installs `CMake` [twxs] extension alongside with the main extension
 - `clangd` [LLVM]
-    - add support for syntax completion
+    - optional; adds support for syntax completion - `clangd` completion seems to me to be more reliable on Linux platform than default Intellisense from Microsoft's `C/C++` extension
 
 ![](res/extensions.png)
 

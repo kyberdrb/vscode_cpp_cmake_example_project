@@ -6,7 +6,7 @@
             "name": "Run debugging on Linux platforms",
             "type": "cppdbg", // "cppvsdbg" for Windows
             "request": "launch",
-            "program": "${workspaceFolder}/build-Debug/my_cpp_project", // Location of the compiled executable
+            "program": "${workspaceFolder}/build-Debug/my_cpp_project", // Location of the compiled executable formatted as UNIX-style path
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -23,7 +23,19 @@
             ]
         },
         {
-            "name": "Run debugging on Windows platforms",
+            "name": "Run debugging on Windows platforms with MSVC debugger - launch the binary",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build-Debug/Debug/my_cpp_project.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "internalConsole",
+            "preLaunchTask": "C/C++: cl.exe build active file"
+        },
+        {
+            "name": "Run debugging on Windows platforms with MSVC debugger - attach to the running binary",
             "type": "cppvsdbg",
             "request": "attach", // or "launch" for direct startup
             "processId": "${command:pickProcess}"

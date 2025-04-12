@@ -1,28 +1,83 @@
 # VSCode CMake C++ project template
 
 With clangd syntax completion & debugging support
-
 Building with GCC compiler, GDB debugger
 
-Linux (possibly UNIX) only
+Guide compatible with Linux (possibly UNIX) only; experimental Windows support
 
-Tested on Arch Linux with GCC 14.2.1
+Tested on:
 
-## Extensions Installed
+- Arch Linux with GCC 14.2.1 and Clang 18.1.8
+- Windows 11 with MSVC 19.43 (TODO check version)
+
+## Visual Studio Code: Installed Extensions
 
 - `C/C++` [Microsoft]
     - adds support for debugging
 - `CMake Tools` [Microsoft]
     - adds support for CMake syntax completion & highlighting
-    - installs `CMake` [twxs] extension alongside with the main extension
+    - installs `CMake` [twxs] extension alongside with the main extension, but since version 1.21.13 it's no longer needed for syntax completion and referencing
 - `clangd` [LLVM]
     - optional; adds support for syntax completion - `clangd` completion seems to me to be more reliable on Linux platform than default Intellisense from Microsoft's `C/C++` extension
 
 ![](res/extensions.png)
 
+## Windows 11 Setup
+
+In order to build C++ projects on Windows platform, following utilities and components need to be installed.
+
+### Installing components from Visual Studio Installer
+
+Install Visual Studio 2022 Community IDE. Open _Visual Studio Installer_, where you choose following components for download and installation:
+
+Core Components:
+
+-  MSVC Compiler Toolchain (both with and without Spectre/Meltdown mitigations)
+- Windows SDK (the latest version is usually recommended, but you can install multiple versions for compatibility)
+- C++ Core Features (includes standard library implementations)
+- CMake tools for Windows (though, the latest/specific version can be installed separately)
+
+Cross-Platform Development Components:
+
+- C++ Linux Development tools (if targeting Linux)
+- Clang compiler (useful for cross-platform code compatibility)
+- Build Tools for Visual Studio with C++ workload
+- Linux development with C++ (if targeting Linux, install the workload)
+
+### Installing Components with Build Tools for Visual Studio (Without Visual Studio IDE)
+
+1. Download the "Build Tools for Visual Studio" (a much smaller package)
+1. Run the installer and select the "Desktop development with C++" workload
+1. Under "Installation details," select specific components:
+
+    - MSVC Compiler (v143 for latest, plus any older versions you need)
+    - Windows SDK (latest version is recommended)
+    - C++ CMake tools for Windows
+    - C++ ATL for latest build tools (if needed)
+    - C++ MFC for latest build tools (if needed)
+
+Optional components
+
+- Git for Windows
+
+**Configure Environment:**
+
+Ensure the standalone Developer Command Prompt or Developer PowerShell is accessible to use the tools and utilities installed by the installer.  
+You can create a shortcut to VSCode that launches from the Developer Command Prompt to ensure all environment variables are set correctly and all tools and utilities are accessible.
+
+Set up the Linux connection in VSCode to an external machine, virtual machine, Docker container or WSL instance (or configure CMakePresets.json for both Windows and Linux targets)
+
+Consider using CMakePresets.json for modern configuration (supported in VSCode and Visual Studio 2019 v16.10+)
+
+With these components and setup, you should be able to build and debug C++ code seamlessly on both Windows and Linux platforms using VSCode with the appropriate extensions.
+
 ## Build Commands
 
-Commands in chronologic order
+Commands in chronologic order.
+
+TODO use `Ninja` makefile generator and `CMakePresets.json`
+
+TODO generate `.clangd` (Linux only), `launch.json` (platform specific configuration only) and `settings.json` (add line for disabling Microsoft's C++ IntelliSense only if on Linux platform) from `CMake`
 
 ### Build
 
@@ -101,6 +156,80 @@ The autocompletion and `Ctrl + click`/`F12` reference resolution works after fir
 Check repo status
 
 `date && git branch && git status && git diff`
+
+## CMake: Scanning for kits in VSCode
+
+After opening a directory with a CMake project in VSCode, the CMake VSCode extension prompts you to select kit.  
+Choose one from the drop down menu from the command bar.
+
+Configuration for all locally available kits will be stored in  
+`/home/laptop/.local/share/CMakeTools/cmake-tools-kits.json`
+
+Example CMake output after toolchain kit configuration:
+
+```
+[proc] Executing command: /usr/bin/cmake --version
+[proc] Executing command: /usr/bin/cmake -E capabilities
+[kit] Successfully loaded 3 kits from /home/laptop/.local/share/CMakeTools/cmake-tools-kits.json
+[variant] Loaded new set of variants
+[proc] Executing command: /usr/bin/gcc -v
+[main] Configuring project: roboauto_assignment 
+[proc] Executing command: /usr/bin/cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ --no-warn-unused-cli -S/home/laptop/git/kyberdrb/vscode_cpp_cmake_minimal_project -B/home/laptop/git/kyberdrb/vscode_cpp_cmake_minimal_project/build -G Ninja
+[cmake] Not searching for unused variables given on the command line.
+[cmake] -- The C compiler identification is GNU 14.2.1
+[cmake] -- The CXX compiler identification is GNU 14.2.1
+[cmake] -- Detecting C compiler ABI info
+[cmake] -- Detecting C compiler ABI info - done
+[cmake] -- Check for working C compiler: /usr/bin/gcc - skipped
+[cmake] -- Detecting C compile features
+[cmake] -- Detecting C compile features - done
+[cmake] -- Detecting CXX compiler ABI info
+[cmake] -- Detecting CXX compiler ABI info - done
+[cmake] -- Check for working CXX compiler: /usr/bin/g++ - skipped
+[cmake] -- Detecting CXX compile features
+[cmake] -- Detecting CXX compile features - done
+[cmake] -- Configuring done (1.2s)
+[cmake] -- Generating done (0.0s)
+[cmake] -- Build files have been written to: /home/laptop/git/kyberdrb/vscode_cpp_cmake_minimal_project/build
+[main] Configuring project: roboauto_assignment 
+[proc] Executing command: /usr/bin/cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ --no-warn-unused-cli -S/home/laptop/git/kyberdrb/vscode_cpp_cmake_minimal_project -B/home/laptop/git/kyberdrb/vscode_cpp_cmake_minimal_project/build -G Ninja
+[cmake] Not searching for unused variables given on the command line.
+[cmake] -- Configuring done (0.1s)
+[cmake] -- Generating done (0.0s)
+[cmake] -- Build files have been written to: /home/laptop/git/kyberdrb/vscode_cpp_cmake_minimal_project/build
+```
+
+Example content of `/home/laptop/.local/share/CMakeTools/cmake-tools-kits.json`
+
+```
+$ cat /home/laptop/.local/share/CMakeTools/cmake-tools-kits.json
+[
+  {
+    "name": "Clang 18.1.8 x86_64-pc-linux-gnu",
+    "compilers": {
+      "C": "/usr/bin/clang",
+      "CXX": "/usr/bin/clang++"
+    },
+    "isTrusted": true
+  },
+  {
+    "name": "Clang-cl 18.1.8 x86_64-pc-windows-msvc",
+    "compilers": {
+      "C": "/usr/bin/clang-cl",
+      "CXX": "/usr/bin/clang-cl"
+    },
+    "isTrusted": true
+  },
+  {
+    "name": "GCC 14.2.1 x86_64-pc-linux-gnu",
+    "compilers": {
+      "C": "/usr/bin/gcc",
+      "CXX": "/usr/bin/g++"
+    },
+    "isTrusted": true
+  }
+]
+```
 
 ## Project structure
 
@@ -685,80 +814,6 @@ Change kernel variable to enable Perf to collect information about the program's
 Debug
 
 `/usr/bin/perf record --freq=997 --call-graph dwarf -q -o /tmp/clion15732317547050053395perf ${PATH_TO_PROJECT}/cmake-build-debug/Observer-Push-Concrete_Subject_and_Observers-Single_file`
-
-## Scanning for kits
-
-After opening a directory with a CMake project in VSCode, the CMake VSCode extension prompts you to select kit.  
-Choose one from the drop down menu from the command bar.
-
-Configuration for all locally available kits will be stored in  
-`/home/laptop/.local/share/CMakeTools/cmake-tools-kits.json`
-
-Example CMake output after toolchain kit configuration:
-
-```
-[proc] Executing command: /usr/bin/cmake --version
-[proc] Executing command: /usr/bin/cmake -E capabilities
-[kit] Successfully loaded 3 kits from /home/laptop/.local/share/CMakeTools/cmake-tools-kits.json
-[variant] Loaded new set of variants
-[proc] Executing command: /usr/bin/gcc -v
-[main] Configuring project: roboauto_assignment 
-[proc] Executing command: /usr/bin/cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ --no-warn-unused-cli -S/home/laptop/git/kyberdrb/vscode_cpp_cmake_minimal_project -B/home/laptop/git/kyberdrb/vscode_cpp_cmake_minimal_project/build -G Ninja
-[cmake] Not searching for unused variables given on the command line.
-[cmake] -- The C compiler identification is GNU 14.2.1
-[cmake] -- The CXX compiler identification is GNU 14.2.1
-[cmake] -- Detecting C compiler ABI info
-[cmake] -- Detecting C compiler ABI info - done
-[cmake] -- Check for working C compiler: /usr/bin/gcc - skipped
-[cmake] -- Detecting C compile features
-[cmake] -- Detecting C compile features - done
-[cmake] -- Detecting CXX compiler ABI info
-[cmake] -- Detecting CXX compiler ABI info - done
-[cmake] -- Check for working CXX compiler: /usr/bin/g++ - skipped
-[cmake] -- Detecting CXX compile features
-[cmake] -- Detecting CXX compile features - done
-[cmake] -- Configuring done (1.2s)
-[cmake] -- Generating done (0.0s)
-[cmake] -- Build files have been written to: /home/laptop/git/kyberdrb/vscode_cpp_cmake_minimal_project/build
-[main] Configuring project: roboauto_assignment 
-[proc] Executing command: /usr/bin/cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ --no-warn-unused-cli -S/home/laptop/git/kyberdrb/vscode_cpp_cmake_minimal_project -B/home/laptop/git/kyberdrb/vscode_cpp_cmake_minimal_project/build -G Ninja
-[cmake] Not searching for unused variables given on the command line.
-[cmake] -- Configuring done (0.1s)
-[cmake] -- Generating done (0.0s)
-[cmake] -- Build files have been written to: /home/laptop/git/kyberdrb/vscode_cpp_cmake_minimal_project/build
-```
-
-Example content of `/home/laptop/.local/share/CMakeTools/cmake-tools-kits.json`
-
-```
-$ cat /home/laptop/.local/share/CMakeTools/cmake-tools-kits.json
-[
-  {
-    "name": "Clang 18.1.8 x86_64-pc-linux-gnu",
-    "compilers": {
-      "C": "/usr/bin/clang",
-      "CXX": "/usr/bin/clang++"
-    },
-    "isTrusted": true
-  },
-  {
-    "name": "Clang-cl 18.1.8 x86_64-pc-windows-msvc",
-    "compilers": {
-      "C": "/usr/bin/clang-cl",
-      "CXX": "/usr/bin/clang-cl"
-    },
-    "isTrusted": true
-  },
-  {
-    "name": "GCC 14.2.1 x86_64-pc-linux-gnu",
-    "compilers": {
-      "C": "/usr/bin/gcc",
-      "CXX": "/usr/bin/g++"
-    },
-    "isTrusted": true
-  }
-]
-```
 
 ## Sources
 

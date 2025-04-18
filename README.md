@@ -159,7 +159,7 @@ Check repo status
 
 ## CMake: Scanning for kits in VSCode
 
-After opening a directory with a CMake project in VSCode, the CMake VSCode extension prompts you to select kit.  
+After opening a directory with a CMake project in VSCode, the `CMake Tools` VSCode extension prompts you to select kit.  
 Choose one from the drop down menu from the command bar.
 
 Configuration for all locally available kits will be stored in  
@@ -250,7 +250,16 @@ my_cpp_project/
 └── README.md            # Project description, build instructions
 ```
 
----
+## AI models
+
+Recommended AI providers and models for C++ development (2025/04/18):
+
+- Remote AI: Claude 3.7 Sonet
+- Local AI: Deepseek Coder V2 Lite Instruct Q5_K_S [bartowski] for the laptop version of RTX 4060 8GB - and even then it consumes additional 4GB from the RAM
+
+## AI answers/help/guidance/scaffolding
+
+Below are models that I use for C++ development assistance. Online providers for private or debranded code, local AI for business sensitive code.
 
 ## What would an absolute minimal CMake C++ project look like in VSCode with clangd IntelliSense autocompletion and debugging support?
 

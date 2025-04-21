@@ -81,28 +81,68 @@ TODO generate `.clangd` (Linux only), `launch.json` (platform specific configura
 
 ### Build
 
-Set path to repo and executable name. Assuming we're already in the repo dir.
+**BEFORE YOU START BUILDING THE PROJECT**  
+prepare the environment: set path to repo and executable name. Assuming we're already in the repo dir.
+
+**Linux terminal/Windows: Git Bash**
 
 ```sh
 cd /path/to/repo
 PATH_TO_REPO="$(pwd)"
 EXECUTABLE_NAME="my_cpp_project"
+MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME="build"
 DEBUG_BUILD_DIR_NAME="build-Debug"
 RELEASE_BUILD_DIR_NAME="build-Release"
-```
 
-Verify
-
-```sh
 echo ${PATH_TO_REPO}
 echo ${EXECUTABLE_NAME}
+echo ${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}
 echo ${DEBUG_BUILD_DIR_NAME}
 echo ${RELEASE_BUILD_DIR_NAME}
 ```
 
-The absolute path to the repository directory will be printed.
+**Windows: PowerShell**
+
+```powershell
+cd path\to\repo
+$PATH_TO_REPO = Get-Location
+$EXECUTABLE_NAME = "my_cpp_project"
+$MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME="build"
+$DEBUG_BUILD_DIR_NAME = "build-Debug"
+$RELEASE_BUILD_DIR_NAME = "build-Release"
+
+echo ${PATH_TO_REPO}
+echo ${EXECUTABLE_NAME}
+echo ${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}
+echo ${DEBUG_BUILD_DIR_NAME}
+echo ${RELEASE_BUILD_DIR_NAME}
+```
+
+**Windows: Command Prompt**
+
+Access home directory in Command Prompt via `"%USERPROFILE%"` variable: `echo "%USERPROFILE%"` .  
+Notice the double quotes around the variable definitions, which allow for blank characters to be present in the names
+
+```bat
+cd path\to\repo
+set "PATH_TO_REPO=%CD%"
+set "EXECUTABLE_NAME=my_cpp_project"
+set "MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME=build"
+set "DEBUG_BUILD_DIR_NAME=build-Debug"
+set "RELEASE_BUILD_DIR_NAME=build-Release"
+
+echo %PATH_TO_REPO%
+echo %EXECUTABLE_NAME%
+echo %MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME%
+echo %DEBUG_BUILD_DIR_NAME%
+echo %RELEASE_BUILD_DIR_NAME%
+```
 
 ### Debug
+
+Build instructions for building a Debug executable in various terminals on different platforms.
+
+**Linux terminal - default makefile generator: `Unix Makefiles`**
 
 ```sh
 cd "${PATH_TO_REPO}"
@@ -112,21 +152,115 @@ cd "${DEBUG_BUILD_DIR_NAME}"
 pwd
 ls
 ls ..
+cmake -DCMAKE_BUILD_TYPE=Debug .. # Equivalent commands:
+#   'cmake ..'
+#   'cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ..'
+#  explicitly specifying the build version. In CMake, the 'Debug' build variant explicitly specified in option '-DCMAKE_BUILD_TYPE=Debug' is being chosen by default. On Linux, the makefile generator "Unix Makefiles" is being chosen by default on Linux systems, which is a single-config generator.
+cmake --build . # Equivalent command for "Unix Makefiles" generator:
+#   'cmake --build . --config Debug'
+#  explicitly specifying the build version. The 'Debug' version, as it is the default option. "Unix Makefiles" generator is a single-config generator, and as such at building the project it takes into account the value of the variable 'CMAKE_BUILD_TYPE'
+ls
+ldd "${EXECUTABLE_NAME}"
+./${EXECUTABLE_NAME}
+```
+
+**Windows: Git Bash - default makefile generator: `Visual Studio 17 2022`**
+
+```sh
+cd "${PATH_TO_REPO}"
+rm --verbose --recursive "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
+mkdir "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
+cd "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
+pwd
+ls
+ls ..
+cmake -DCMAKE_BUILD_TYPE=Debug .. # On Windows, the makefile generator "Visual Studio 17 2022" is being chosen by default, which is a multi-config generator - see 'cmake --help' in section 'Generators': the asterisk left to a generator marks the default one - as long as Visual Studio 2022 or related Build Tools are installed. For specifying the makefile generator explicitly, use the '-G' option: 
+#   'cmake -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Debug ..' (generates the SLN project file) or 
+#   'cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug ..'
+cmake --build . # Equivalent command for "Visual Studio 17 2022" makefile generator:
+#   'cmake --build . --config Debug'
+#  would work equivalently too for building the generated Debug version, as it is the default option, but being explicit is cross-compatible among single-config and multi-config makefile generators, releasing the developer from mental effort which makefile generator is of which type
+ls
+ldd ./Debug/${EXECUTABLE_NAME}
+Dependencies.exe -depth 1 -chain ./Debug/${EXECUTABLE_NAME}.exe # Requires 'Dependencies' utility
+./Debug/${EXECUTABLE_NAME}
+```
+
+**Windows: PowerShell - default makefile generator: `Visual Studio 17 2022`**
+
+```powershell
+cd "${PATH_TO_REPO}"
+Remove-Item -Verbose -Recurse -Path "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
+mkdir "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
+cd "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
+pwd
+ls
+ls ..
 cmake -DCMAKE_BUILD_TYPE=Debug ..
 cmake --build .
 ls
-ldd ${EXECUTABLE_NAME}
+Dependencies.exe -depth 1 -chain ./Debug/${EXECUTABLE_NAME}.exe
+& ./Debug/${EXECUTABLE_NAME} # Launching an executable on a given path that has a variable in it requires adding a call operator '&' to expand each variable
 ```
+
+**Windows: Command Prompt - default makefile generator: `Visual Studio 17 2022`**
+
+```bat
+cd "%PATH_TO_REPO%"
+rmdir /s /q "%MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME%"
+mkdir "%MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME%"
+cd "%MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME%"
+cd
+dir
+dir ..
+cmake -DCMAKE_BUILD_TYPE=Debug ..
+cmake --build . --config Debug
+dir
+Dependencies.exe -depth 1 -chain .\Debug\%EXECUTABLE_NAME%.exe
+.\Debug\%EXECUTABLE_NAME%
+```
+
+The utility `Dependencies.exe` is the executable of **_Dependencies_** utility - an ancestor of **_Dependency Walker_**  - which is the equivalent of `ldd` on Linux/UNIX systems. Download from [direct link](https://github.com/lucasg/Dependencies/releases/latest/download/Dependencies_x64_Release.zip) or via [homepage](https://github.com/lucasg/Dependencies) . Extract the archive to a separate directory, put it to a place among other explicitly installed utilities e.g. `C:\utils\Dependencies_x64_Release\` , add this path to the `Path` system environment variable in `Advanced system settings -> Environment Variables...` and open another shell/command prompt to use the updated settings.  
+Alternatively, there is **_Process Explorer_** that let's you see the dependencies of an executable at runtime. Download from [direct link](https://download.sysinternals.com/files/ProcessExplorer.zip) or via [homepage](https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer)
 
 **Incremental Debug Build One-Liner**
 
+**_Linux terminal - default makefile generator: `Unix Makefiles`_**
+
+```sh
+date && cd "${PATH_TO_REPO}/${DEBUG_BUILD_DIR_NAME}" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . --config Debug && ./${EXECUTABLE_NAME}
 ```
-date && cd "${PATH_TO_REPO}/${DEBUG_BUILD_DIR_NAME}" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . && ./${EXECUTABLE_NAME}
+
+**_Windows: Git Bash - default makefile generator: `Visual Studio 17 2022`_**
+
+```sh
+date && cd "${PATH_TO_REPO}/${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . --config Debug && ./Debug/${EXECUTABLE_NAME}
 ```
+
+**_Windows: PowerShell - default makefile generator: `Visual Studio 17 2022`_**
+
+```powershell
+# with forward slashes, with or without extension: forward slashes without extension prefered for compatibility
+date; cd "${PATH_TO_REPO}/${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"; cmake -DCMAKE_BUILD_TYPE=Debug ..; cmake --build . --config Debug; & ./Debug/${EXECUTABLE_NAME}
+date; cd "${PATH_TO_REPO}/${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"; cmake -DCMAKE_BUILD_TYPE=Debug ..; cmake --build . --config Debug; & ./Debug/${EXECUTABLE_NAME}.exe
+# or with backward slashes
+date; cd "${PATH_TO_REPO}\${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"; cmake -DCMAKE_BUILD_TYPE=Debug ..; cmake --build . --config Debug; & .\Debug\${EXECUTABLE_NAME}
+date; cd "${PATH_TO_REPO}\${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"; cmake -DCMAKE_BUILD_TYPE=Debug ..; cmake --build . --config Debug; & .\Debug\${EXECUTABLE_NAME}.exe
+```
+
+**_Windows: Command Prompt - default makefile generator: `Visual Studio 17 2022`_**
+
+```bat
+date /t && cd "%PATH_TO_REPO%\%MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME%" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . --config Debug && .\Debug\%EXECUTABLE_NAME%
+```
+
+#### Notes
 
 Set a breakpoint on an arbitrary nonempty line inside a function's body. Then run a debugger with `F5`. The debugger launches the executable, attaches to it, and the execution halts at the breakpoint.
 
 ### Release
+
+**Linux terminal - default makefile generator: `Unix Makefiles`**
 
 ```sh
 cd "${PATH_TO_REPO}"
@@ -136,20 +270,103 @@ cd "${RELEASE_BUILD_DIR_NAME}"
 pwd
 ls
 ls ..
-cmake -DCMAKE_BUILD_TYPE=Release ..
-cmake --build .
+cmake -DCMAKE_BUILD_TYPE=Release .. # Equivalent command:
+#   'cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..' . Uses "Unix Makefiles" as default makefile generator on Linux systems
+cmake --build . # Equivalent command for "Unix Makefiles" generator:
+#   'cmake --build . --config Release' 
+#  "Unix Makefiles" generator is a single-configuration makefile generator, and as such takes into consideration the value of 'CMAKE_BUILD_TYPE' during CMake generation phase in previous command, making the explicitly specified '--config' option superfluous.
 ls
+ldd ${EXECUTABLE_NAME}
+./${EXECUTABLE_NAME}
+```
+
+**Windows: Git Bash - default makefile generator: `Visual Studio 17 2022`**
+
+```sh
+cd "${PATH_TO_REPO}"
+rm --verbose --recursive "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
+mkdir "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
+cd "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
+pwd
+ls
+ls ..
+cmake -DCMAKE_BUILD_TYPE=Release .. # Equivalent command:
+#   'cmake -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release ..'
+cmake --build . --config Release # The '--config Release' option needs to be specified explicitly, otherwise the 'Debug' binary gets built by default. As the "Visual Studio 17 2022" makefile generator - the default generator on Windows - is a multi-config makefile generator, an as such it needs an explicitly specified build type when other than the default 'Debug' type is wanted to produce the desired executable type, overriding the default 'Debug' build type setting.
+ls
+ldd ./Release/${EXECUTABLE_NAME}
+Dependencies.exe -depth 1 -chain ./Release/${EXECUTABLE_NAME}.exe
+./Release/${EXECUTABLE_NAME}
+```
+
+**Windows: PowerShell - default makefile generator: `Visual Studio 17 2022`**
+
+```powershell
+cd "${PATH_TO_REPO}"
+Remove-Item -Verbose -Recurse -Path "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
+mkdir "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
+cd "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
+pwd
+ls
+ls ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build . --config Release
+ls
+Dependencies.exe -depth 1 -chain ./Release/${EXECUTABLE_NAME}.exe
+& ./Release/${EXECUTABLE_NAME}
+```
+
+**Windows: Command Prompt - default makefile generator: `Visual Studio 17 2022`**
+
+```bat
+cd "%PATH_TO_REPO%"
+rmdir /s /q "%MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME%"
+mkdir "%MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME%"
+cd "%MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME%"
+cd
+dir
+dir ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build . --config Release
+dir
+Dependencies.exe -depth 1 -chain .\Release\%EXECUTABLE_NAME%.exe
+.\Release\%EXECUTABLE_NAME%
 ```
 
 **Incremental Release Build One-Liner**
 
+**_Linux terminal_**
+
+```sh
+date && cd "${PATH_TO_REPO}/${RELEASE_BUILD_DIR_NAME}" && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . --config Release && ./${EXECUTABLE_NAME}
 ```
-date && cd "${PATH_TO_REPO}/${RELEASE_BUILD_DIR_NAME}" && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . && ./${EXECUTABLE_NAME}
+
+**_Windows: Git Bash_**
+
+```sh
+date && cd "${PATH_TO_REPO}/${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}" && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . --config Release && ./Release/${EXECUTABLE_NAME}
+```
+
+**_Windows: PowerShell_**
+
+```powershell
+# with forward slashes, with or without extension: forward slashes without extension prefered for compatibility
+date; cd "${PATH_TO_REPO}/${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"; cmake -DCMAKE_BUILD_TYPE=Release ..; cmake --build . --config Release; & ./Release/${EXECUTABLE_NAME}
+date; cd "${PATH_TO_REPO}/${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"; cmake -DCMAKE_BUILD_TYPE=Release ..; cmake --build . --config Release; & ./Release/${EXECUTABLE_NAME}.exe
+# or with backward slashes
+date; cd "${PATH_TO_REPO}\${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"; cmake -DCMAKE_BUILD_TYPE=Release ..; cmake --build . --config Release; & .\Release\${EXECUTABLE_NAME}
+date; cd "${PATH_TO_REPO}\${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"; cmake -DCMAKE_BUILD_TYPE=Release ..; cmake --build . --config Release; & .\Release\${EXECUTABLE_NAME}.exe
+```
+
+**_Windows: Command Prompt_**
+
+```bat
+date /t && cd "%PATH_TO_REPO%\%MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME%" && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . --config Release && .\Release\%EXECUTABLE_NAME%
 ```
 
 ## Notes
 
-The autocompletion and `Ctrl + click`/`F12` reference resolution works after first configuration/generation of the project. The clangd picks up the generated `compile_commands.json` from the `build` directory and starts completing with `Ctrl + Space`.
+The autocompletion and `Ctrl + click`/`F12` reference resolution works after first configuration/generation of the project. The `clangd` picks up the generated `compile_commands.json` from the `build` directory and starts completing with `Ctrl + Space`.
 
 ## VCS
 
@@ -202,7 +419,7 @@ Example CMake output after toolchain kit configuration:
 Example content of `/home/laptop/.local/share/CMakeTools/cmake-tools-kits.json`
 
 ```
-$ cat /home/laptop/.local/share/CMakeTools/cmake-tools-kits.json
+$ cat ~/.local/share/CMakeTools/cmake-tools-kits.json
 [
   {
     "name": "Clang 18.1.8 x86_64-pc-linux-gnu",
@@ -252,14 +469,15 @@ my_cpp_project/
 
 ## AI models
 
+Below are models that I use for C++ development assistance. Online providers for private or debranded code, local AI for business sensitive code.
+
 Recommended AI providers and models for C++ development (2025/04/18):
 
 - Remote AI: Claude 3.7 Sonet
-- Local AI: Deepseek Coder V2 Lite Instruct Q5_K_S [bartowski] for the laptop version of RTX 4060 8GB - and even then it consumes additional 4GB from the RAM
+- Local AI: DeepSeek Coder V2 Lite Instruct Q5_K_S [bartowski] ([direct link](https://huggingface.co/bartowski/DeepSeek-Coder-V2-Lite-Instruct-GGUF/resolve/main/DeepSeek-Coder-V2-Lite-Instruct-Q5_K_S.gguf?download=true)/[home page](https://huggingface.co/bartowski/DeepSeek-Coder-V2-Lite-Instruct-GGUF)): for the laptop version of RTX 4060 8GB, i9-14900HX, 64GB RAM (32GB free) - and even then it consumes additional ~4GB from the RAM
+    - TODO add concrete parameters from LM Studio (Windows 11 24H2)
 
 ## AI answers/help/guidance/scaffolding
-
-Below are models that I use for C++ development assistance. Online providers for private or debranded code, local AI for business sensitive code.
 
 ## What would an absolute minimal CMake C++ project look like in VSCode with clangd IntelliSense autocompletion and debugging support?
 

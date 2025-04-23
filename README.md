@@ -12,15 +12,15 @@ Tested on:
 
 ## Visual Studio Code: Installed Extensions
 
-- `C/C++` [Microsoft]
-    - adds support for debugging
-- `CMake Tools` [Microsoft]
+- [`C/C++`](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) [Microsoft]
+    - adds support for debugging and syntax completion
+- [`CMake Tools`](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools) [Microsoft]
     - adds support for CMake syntax completion & highlighting
-    - installs `CMake` [twxs] extension alongside with the main extension, but since version 1.21.13 it's no longer needed for syntax completion and referencing
-- `clangd` [LLVM]
+    - installs `CMake` [twxs] extension alongside with the main extension, but since version ~1.21.13 it's no longer needed, thus can be disabled - for syntax completion and referencing
+- **_[Linux only!]_** [`clangd`](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) [LLVM]
     - optional; adds support for syntax completion - `clangd` completion seems to me to be more reliable on Linux platform than default Intellisense from Microsoft's `C/C++` extension
 
-![](res/extensions.png)
+TODO add updated VSCode extensions image [](res/extensions.png)
 
 ## Windows 11 Setup
 

@@ -8,7 +8,7 @@ Guide compatible with Linux (possibly UNIX) only; experimental Windows support
 Tested on:
 
 - Arch Linux with GCC 14.2.1 and Clang 18.1.8
-- Windows 11 with MSVC 19.43 (TODO check version)
+- Windows 11 with MSVC 19.43.34810 for x86
 
 ## Visual Studio Code: Installed Extensions
 
@@ -32,7 +32,7 @@ Install Visual Studio 2022 Community IDE. Open _Visual Studio Installer_, where 
 
 Core Components:
 
--  MSVC Compiler Toolchain (both with and without Spectre/Meltdown mitigations)
+- MSVC Compiler Toolchain (both with and without Spectre/Meltdown mitigations)
 - Windows SDK (the latest version is usually recommended, but you can install multiple versions for compatibility)
 - C++ Core Features (includes standard library implementations)
 - CMake tools for Windows (though, the latest/specific version can be installed separately)
@@ -62,14 +62,7 @@ Optional components
 
 **Configure Environment:**
 
-Ensure the standalone Developer Command Prompt or Developer PowerShell is accessible to use the tools and utilities installed by the installer.  
-You can create a shortcut to VSCode that launches from the Developer Command Prompt to ensure all environment variables are set correctly and all tools and utilities are accessible.
-
-Set up the Linux connection in VSCode to an external machine, virtual machine, Docker container or WSL instance (or configure CMakePresets.json for both Windows and Linux targets)
-
-Consider using CMakePresets.json for modern configuration (supported in VSCode and Visual Studio 2019 v16.10+)
-
-With these components and setup, you should be able to build and debug C++ code seamlessly on both Windows and Linux platforms using VSCode with the appropriate extensions.
+// sys env variables, utils, tools, compilers, toolchains, settings, ...
 
 ## Build Commands
 

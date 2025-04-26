@@ -1,0 +1,146 @@
+PS C:\Users\USERNAME> cd "${HOME}"
+PS C:\Users\USERNAME> mkdir git
+
+
+    Directory: C:\Users\USERNAME
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         4/26/2025   5:36 PM                git
+
+
+PS C:\Users\USERNAME> cd git
+PS C:\Users\USERNAME\git> git clone https://github.com/kyberdrb/vscode_cpp_cmake_example_project.git
+Cloning into 'vscode_cpp_cmake_example_project'...
+remote: Enumerating objects: 124, done.
+remote: Counting objects: 100% (124/124), done.
+remote: Compressing objects: 100% (80/80), done.
+remote: Total 124 (delta 60), reused 98 (delta 34), pack-reused 0 (from 0)
+Receiving objects: 100% (124/124), 89.46 KiB | 275.00 KiB/s, done.
+Resolving deltas: 100% (60/60), done.
+PS C:\Users\USERNAME\git> cd vscode_cpp_cmake_example_project
+PS C:\Users\USERNAME\git\vscode_cpp_cmake_example_project>
+PS C:\Users\USERNAME\git\vscode_cpp_cmake_example_project> # Error 'Cannot find path' is normal, when the directory doesn't exist. This command runs successfully when the directory will be present after building the project
+PS C:\Users\USERNAME\git\vscode_cpp_cmake_example_project> Remove-Item -Verbose -Recurse -Path build
+Remove-Item : Cannot find path 'C:\Users\USERNAME\git\vscode_cpp_cmake_example_project\build' because it does not
+exist.
+At line:1 char:1
++ Remove-Item -Verbose -Recurse -Path build
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (C:\Users\USERNAME\...e_project\build:String) [Remove-Item], ItemNotFoundEx
+   ception
+    + FullyQualifiedErrorId : PathNotFound,Microsoft.PowerShell.Commands.RemoveItemCommand
+
+PS C:\Users\USERNAME\git\vscode_cpp_cmake_example_project>
+PS C:\Users\USERNAME\git\vscode_cpp_cmake_example_project> mkdir build
+
+
+    Directory: C:\Users\USERNAME\git\vscode_cpp_cmake_example_project
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         4/26/2025   5:36 PM                build
+
+
+PS C:\Users\USERNAME\git\vscode_cpp_cmake_example_project> cd build
+PS C:\Users\USERNAME\git\vscode_cpp_cmake_example_project\build>
+PS C:\Users\USERNAME\git\vscode_cpp_cmake_example_project\build> ls .. # look at the files we're going to work with
+
+
+    Directory: C:\Users\USERNAME\git\vscode_cpp_cmake_example_project
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         4/26/2025   5:36 PM                .vscode
+d-----         4/26/2025   5:36 PM                build
+d-----         4/26/2025   5:36 PM                res
+d-----         4/26/2025   5:36 PM                src
+-a----         4/26/2025   5:36 PM           1044 .clangd
+-a----         4/26/2025   5:36 PM              9 .gitignore
+-a----         4/26/2025   5:36 PM            636 CMakeLists.txt
+-a----         4/26/2025   5:36 PM          47086 README.md
+
+
+PS C:\Users\USERNAME\git\vscode_cpp_cmake_example_project\build> cmake .. # Generate build files via CMake from the directory containing CMakeLists.txt with the use of the default toolchain
+-- Building for: Visual Studio 17 2022
+-- Selecting Windows SDK version 10.0.22621.0 to target Windows 10.0.26100.
+-- The C compiler identification is MSVC 19.43.34810.0
+-- The CXX compiler identification is MSVC 19.43.34810.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.43.34808/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.43.34808/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+CMAKE_BUILD_TYPE=
+-- Configuring done (2.9s)
+-- Generating done (0.0s)
+-- Build files have been written to: C:/Users/USERNAME/git/vscode_cpp_cmake_example_project/build
+PS C:\Users\USERNAME\git\vscode_cpp_cmake_example_project\build>
+PS C:\Users\USERNAME\git\vscode_cpp_cmake_example_project\build> ls # look at the files we're going to work with
+
+
+    Directory: C:\Users\USERNAME\git\vscode_cpp_cmake_example_project\build
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         4/26/2025   5:36 PM                CMakeFiles
+-a----         4/26/2025   5:36 PM          46092 ALL_BUILD.vcxproj
+-a----         4/26/2025   5:36 PM            312 ALL_BUILD.vcxproj.filters
+-a----         4/26/2025   5:36 PM          14665 CMakeCache.txt
+-a----         4/26/2025   5:36 PM           1503 cmake_install.cmake
+-a----         4/26/2025   5:36 PM           3128 MyCppProject.sln
+-a----         4/26/2025   5:36 PM          56388 my_cpp_project.vcxproj
+-a----         4/26/2025   5:36 PM            631 my_cpp_project.vcxproj.filters
+-a----         4/26/2025   5:36 PM          46136 ZERO_CHECK.vcxproj
+-a----         4/26/2025   5:36 PM            555 ZERO_CHECK.vcxproj.filters
+
+
+PS C:\Users\USERNAME\git\vscode_cpp_cmake_example_project\build> cmake --build . # Build the project from the generated build files which creates executable file
+MSBuild version 17.13.19+0d9f5a35a for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule C:/Users/USERNAME/git/vscode_cpp_cmake_example_project/CMakeLists.txt
+  main.cpp
+  my_cpp_project.vcxproj -> C:\Users\USERNAME\git\vscode_cpp_cmake_example_project\build\Debug\my_cpp_project.exe
+  Building Custom Rule C:/Users/USERNAME/git/vscode_cpp_cmake_example_project/CMakeLists.txt
+PS C:\Users\USERNAME\git\vscode_cpp_cmake_example_project\build> ./Debug/my_cpp_project.exe # Run the project
+Hello, VS Code + CMake + clangd!
+42
+Testing std::format
+Testing std::print
+
+triggerArtificialException(false) [happy path]: 42
+
+triggerArtificialException(true) [catching exception]: C:\Users\USERNAME\git\vscode_cpp_cmake_example_project\src\main.cpp:class std::expected<unsigned int,class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > > __cdecl triggerArtificialException(bool):13:79: ERROR - Exception occured
+
+std::any_of found an element matching criteria
+
+0000/0 is not a valid month/00 is not a valid day
+2025/04/26
+2025/04/26
+2025/04/26
+2025/04/26
+2025/04/26
+Thanksgiving: 2025/11/27
+Thanksgiving:          2025/11/27
+Canadian Thanksgiving: 2025/10/13
+EOF
+PS C:\Users\USERNAME\git\vscode_cpp_cmake_example_project\build> cmake --version
+cmake version 3.30.5-msvc23
+PS C:\Users\USERNAME\git\vscode_cpp_cmake_example_project\build> git --version
+git version 2.49.0.windows.1
+PS C:\Users\USERNAME\git\vscode_cpp_cmake_example_project\build> cl
+Microsoft (R) C/C++ Optimizing Compiler Version 19.43.34810 for x86
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+usage: cl [ option... ] filename... [ /link linkoption... ]
+PS C:\Users\USERNAME\git\vscode_cpp_cmake_example_project\build>

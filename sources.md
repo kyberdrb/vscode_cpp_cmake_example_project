@@ -1,0 +1,28 @@
+- General
+    - copied & pasted Q&A from OpenAI ChatGPT conversation `VS Code C++ Setup Arch`
+    - https://duckduckgo.com/?t=ffab&q=vscode+cppdbg&ia=web
+    - https://code.visualstudio.com/docs/cpp/launch-json-reference
+    - https://duckduckgo.com/?t=ffab&q=vscode+c%2B%2B+cmake+debugging&ia=web
+    - https://devblogs.microsoft.com/cppblog/introducing-cmake-debugger-in-vs-code-debug-your-cmake-scripts-using-open-source-cmake-debugger/
+    - https://www.reddit.com/r/neovim/comments/17rhvtl/guide_how_to_use_clangd_cc_lsp_in_any_project/
+    - https://clangd.llvm.org/installation.html
+    - https://www.reddit.com/r/cpp/comments/gy08ip/which_ide_do_you_use_or_if_you_prefer_text/
+    - https://duckduckgo.com/?q=clangd+vscode+c%2B%2B+cmake&t=ffab&ia=web
+    - https://duckduckgo.com/?q=clangd+vscode+c%2B%2B+cmake&t=ffab&ia=web
+    - https://stackoverflow.com/questions/51885784/how-to-setup-vs-code-for-c-with-clangd-support
+    - https://github.com/Mizux/cmake-cpp
+    - https://duckduckgo.com/?t=ffab&q=c%2Fc%2B%2B+extension+visual+studio+code+microsoft&ia=web
+    - https://code.visualstudio.com/docs/languages/cpp
+    - https://github.com/microsoft/vscode-cpptools
+    - https://duckduckgo.com/?q=microsoft+c%2Fc%2B%2B+extension+not+available+vscode&t=ffab&df=m&ia=web
+    - https://github.com/microsoft/vscode-cpptools/discussions/12840
+    - https://code.visualstudio.com/docs/cpp/config-linux#_prerequisites
+    - https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools
+    - https://www.youtube.com/results?search_query=visual+studio+code+c%2B%2B+linux
+    - https://www.youtube.com/watch?v=oQ9E_LFoo9U
+    - https://github.com/marmottetranquille/Cpp-skeleton
+    - https://duckduckgo.com/?t=ffab&q=vscode+cmake+c%2B%2B+skeleton&ia=web
+
+- CMake Debugger
+    - https://duckduckgo.com/?t=ffab&q=vscode+c%2B%2B+cmake+debugging&ia=web
+    - https://devblogs.microsoft.com/cppblog/introducing-cmake-debugger-in-vs-code-debug-your-cmake-scripts-using-open-source-cmake-debugger/

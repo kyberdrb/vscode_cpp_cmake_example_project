@@ -1,1067 +1,195 @@
 # VSCode CMake C++ project template
 
-With clangd syntax completion & debugging support
-Building with GCC compiler, GDB debugger
+Why? Because my CLion license expired.  
 
-Guide compatible with Linux (possibly UNIX) only; experimental Windows support
+This is an introductory project to the realm of cross-platform, desktop, open-source C++ development.
 
 Tested on:
 
-- Arch Linux with GCC 14.2.1 and Clang 18.1.8
-- Windows 11 with MSVC 19.43.34810 for x86
+- Arch Linux with GCC 14.2.1
+- Windows 11 with MSVC 19.43.34810
 
-## Visual Studio Code: Installed Extensions
+## The Path of Least Resistance - Simplified Guide
 
-- [`C/C++`](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) [Microsoft]
+We're only going to build the Debug version of the project with the default toolchain, default compiler and default makefile generator for each platform, to make things as simple as possible.
+
+### System Environment preparation - Installing the Toolchain
+
+Click on the operating system you want to build the project on, to jump to the platform specific instructions for installing necessary tools.
+
+- [Windows 11](#windows-11---tools-installation) - MSVC toolchain
+- [Linux](#linux---tools-installation) - GCC toolchain
+- [macOS](#macos---tools-installation) - Apple LLVM / Apple Clang toolchain
+
+### Windows 11 - tools installation
+
+Install following tools:
+
+- [Visual Studio 2022 Community](https://visualstudio.microsoft.com/vs/community/) - provides the MSVC compiler, _Visual Studio 17 2022_ makefile generator for CMake, CMake build system utilities and _Developer PowerShell for VS 2022_ (which isn't included in _Build Tools for Visual Studio_ unfortunately, therefore we're installing the entire Visual Studio IDE).
+    - Install Visual Studio 2022 Community IDE. Open _Visual Studio Installer_, where you choose following components for download and installation:
+    
+        **_Core Components:_**
+
+        - MSVC Compiler Toolchain in latest version (at the time of writing it's v143) in both variants: with and without Spectre/Meltdown mitigations
+        - Windows SDK (Windows 11 24H2 uses `Windows SDK version 10.0.22621.0 to target Windows 10.0.26100` as seen in the CMake generate output)
+        - C++ Core Features (includes standard library implementations)
+        - CMake tools for Windows
+- [git](https://git-scm.com/downloads/win) - _git_ version control system
+    - Install with default settings.
+
+#### Adjusting the system
+
+Verify that the `git` executable recognizable by the system without specifying the exact path to the `git.exe` executable: Open _Developer PowerShell for VS 2022_ and type there `git --version` . If you get a response similar to
+
+```
+git version 2.49.0.windows.1
+```
+
+everything is set up correctly, and we can proceed with building the project.
+
+Otherwise it's needed put the binary directory in the system `Path` variable.
+
+1. Open Windows Settings (e.g. Win+X -> Settings) -> System -> About -> Advanced system settings . A dialog window _System Properties_ opens.
+1. In the _System Properties_ dialog window click on tab _Advanced_ -> click on _Environment Variables_ button. A dialog window _Environment Variables_ opens.
+1. In the _Environment Variables_ dialog window In section _System variables_ find variable `Path` . Double click on it. A dialog window _Edit environment variable opens_.
+1. In the _Edit environment variable opens_ dialog window click on _New_ button. A new line at the bottom in the list of paths is created. Assuming the git is installed to the default path `C:\Program Files\Git`, enter in the line the `cmd` directory in it, where the `git.exe` is located - `C:\Program Files\Git\cmd` [note the absence of the trailing backslash!] . Confirm all dialog windows by clicking on _OK_ button.
+1. Open a new _Developer PowerShell for VS 2022_ window and test the `git --version` command again. Now the terminal will recognize the `git` as a valid command and outputs the currently installed git version as noted above.
+
+Continue with [building the project](#windows-11---clone--build-instructions).
+
+### Linux - tools installation
+
+Install packages that contain these utilities which provide following functionality:
+
+- `gcc`/`g++` - The Compiler
+- `make` - _Unix Makefiles_ generator for CMake
+- `cmake` - CMake metamakefiles generator
+- `git` - _git_ version control system
+
+All these packages might be contained in one metapackage `build-essentials` , that might be available for your Linux distribution. For brewity and simplicity of this tutorial, I'll leave that for you as a homework, how to install the toolchain
+
+### macOS - tools installation
+
+Install following tools
+
+- [Xcode](https://apps.apple.com/us/app/xcode/id497799835?mt=12/) - provides Apple Clang compiler, _Xcode_ makefile generator and Xcode Command Line Tools
+- [CMake](https://github.com/Kitware/CMake/releases/download/v4.0.1/cmake-4.0.1-macos10.10-universal.dmg) - provides CMake build system utilities
+
+### VSCode Extensions
+
+**_VSCode extensions for Windows_**
+
+![](res/vscode_extensions-windows.png)
+
+**_VSCode extensions for Linux_** TODO update: CMake from twxs is no longer needed
+
+![](res/vscode_extensions-linux.png)
+
+- [`C/C++`](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) from _Microsoft_
     - adds support for debugging and syntax completion
-- [`CMake Tools`](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools) [Microsoft]
+- [`CMake Tools`](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools) from _Microsoft_
     - adds support for CMake syntax completion & highlighting
     - installs `CMake` [twxs] extension alongside with the main extension, but since version ~1.21.13 it's no longer needed, thus can be disabled - for syntax completion and referencing
-- **_[Linux only!]_** [`clangd`](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) [LLVM]
-    - optional; adds support for syntax completion - `clangd` completion seems to me to be more reliable on Linux platform than default Intellisense from Microsoft's `C/C++` extension
+- **_[Linux only!]_** [`clangd`](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) from _LLVM_
+    - optional; adds support for syntax completion - `clangd` completion seems to me to be more reliable on Linux platform than default Intellisense from Microsoft's `C/C++` extension; maybe on macOS it works the same way. Maybe not on all Linux distributions, but I use it in VSCode on Arch Linux.
 
-TODO add updated VSCode extensions image [](res/extensions.png)
+### Build instructions - The Path of Least Resistance
 
-## Windows 11 Setup
+We're only going to build the Debug version of the project with default compiler and makefile generator, to make things as simple as possible.
 
-In order to build C++ projects on Windows platform, following utilities and components need to be installed.
+- Configuring with CMake
+- Building the project
+- Running the executable
 
-### Installing components from Visual Studio Installer
+Click on the operating system you want to build the project on, to jump to the platform specific instructions for building the project.
 
-Install Visual Studio 2022 Community IDE. Open _Visual Studio Installer_, where you choose following components for download and installation:
+- [Windows 11](#windows-11---build-instructions): MSVC toolchain
+- [Linux](#linux---build-instructions): GCC toolchain
+- [macOS](#macos---build-instructions): Apple LLVM / Apple Clang toolchain
 
-Core Components:
+#### Windows 11 - clone & build instructions
 
-- MSVC Compiler Toolchain (both with and without Spectre/Meltdown mitigations)
-- Windows SDK (the latest version is usually recommended, but you can install multiple versions for compatibility)
-- C++ Core Features (includes standard library implementations)
-- CMake tools for Windows (though, the latest/specific version can be installed separately)
+Open _Developer PowerShell for VS 2022_
 
-Cross-Platform Development Components:
+##### Full build
 
-- C++ Linux Development tools (if targeting Linux)
-- Clang compiler (useful for cross-platform code compatibility)
-- Build Tools for Visual Studio with C++ workload
-- Linux development with C++ (if targeting Linux, install the workload)
-
-### Installing Components with Build Tools for Visual Studio (Without Visual Studio IDE)
-
-1. Download the "Build Tools for Visual Studio" (a much smaller package)
-1. Run the installer and select the "Desktop development with C++" workload
-1. Under "Installation details," select specific components:
-
-    - MSVC Compiler (v143 for latest, plus any older versions you need)
-    - Windows SDK (latest version is recommended)
-    - C++ CMake tools for Windows
-    - C++ ATL for latest build tools (if needed)
-    - C++ MFC for latest build tools (if needed)
-
-Optional components
-
-- Git for Windows
-
-**Configure Environment:**
-
-// sys env variables, utils, tools, compilers, toolchains, settings, ...
-
-## Build Commands
-
-Commands in chronologic order.
-
-TODO use `Ninja` makefile generator and `CMakePresets.json`
-
-TODO generate `.clangd` (Linux only), `launch.json` (platform specific configuration only) and `settings.json` (add line for disabling Microsoft's C++ IntelliSense only if on Linux platform) from `CMake`
-
-### Build
-
-**BEFORE YOU START BUILDING THE PROJECT**  
-prepare the environment: set path to repo and executable name. Assuming we're already in the repo dir.
-
-**Linux terminal/Windows: Git Bash**
-
-```sh
-cd /path/to/repo
-PATH_TO_REPO="$(pwd)"
-EXECUTABLE_NAME="my_cpp_project"
-MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME="build"
-DEBUG_BUILD_DIR_NAME="build-Debug"
-RELEASE_BUILD_DIR_NAME="build-Release"
-
-echo ${PATH_TO_REPO}
-echo ${EXECUTABLE_NAME}
-echo ${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}
-echo ${DEBUG_BUILD_DIR_NAME}
-echo ${RELEASE_BUILD_DIR_NAME}
-```
-
-**Windows: PowerShell**
+You may copy&paste the commands line-by-line, or execute it all at once, inthe _Developer PowerShell for VS 2022_
 
 ```powershell
-cd path\to\repo
-$PATH_TO_REPO = Get-Location
-$EXECUTABLE_NAME = "my_cpp_project"
-$MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME="build"
-$DEBUG_BUILD_DIR_NAME = "build-Debug"
-$RELEASE_BUILD_DIR_NAME = "build-Release"
+cd "${HOME}"
+mkdir git
+cd git
+git clone https://github.com/kyberdrb/vscode_cpp_cmake_example_project.git
+cd vscode_cpp_cmake_example_project
 
-echo ${PATH_TO_REPO}
-echo ${EXECUTABLE_NAME}
-echo ${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}
-echo ${DEBUG_BUILD_DIR_NAME}
-echo ${RELEASE_BUILD_DIR_NAME}
+# Error 'Cannot find path' is normal, when the directory doesn't exist. This command runs successfully when the directory will be present after building the project
+Remove-Item -Verbose -Recurse -Path build
+
+mkdir build # fails, if the directory already exists, which is also normal
+cd build
+
+ls .. # look at the files we're going to work with
+cmake .. # Generate build files via CMake from the directory containing CMakeLists.txt with the use of the default toolchain
+
+ls # look at the files we're going to work with
+cmake --build . # Build the project from the generated build files which creates executable file
+./Debug/my_cpp_project.exe # Run the project
 ```
 
-**Windows: Command Prompt**
+[Here](res/example_output-simple_windows_11.txt) is an example output from _Developer PowerShell for VS 2022_ on Windows 11 with Visual Studio 17.13.6 and Git 2.49.0 .
 
-Access home directory in Command Prompt via `"%USERPROFILE%"` variable: `echo "%USERPROFILE%"` .  
-Notice the double quotes around the variable definitions, which allow for blank characters to be present in the names
+Example output from _Developer PowerShell for VS 2022_ on Windows 11 with Visual Studio 17.13.6 and Git 2.49.0 is available [here](res/example_output-simple_windows_11.txt).
 
-```bat
-cd path\to\repo
-set "PATH_TO_REPO=%CD%"
-set "EXECUTABLE_NAME=my_cpp_project"
-set "MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME=build"
-set "DEBUG_BUILD_DIR_NAME=build-Debug"
-set "RELEASE_BUILD_DIR_NAME=build-Release"
+##### Incremental build
 
-echo %PATH_TO_REPO%
-echo %EXECUTABLE_NAME%
-echo %MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME%
-echo %DEBUG_BUILD_DIR_NAME%
-echo %RELEASE_BUILD_DIR_NAME%
-```
-
-### Debug
-
-Build instructions for building a Debug executable in various terminals on different platforms.
-
-**Linux terminal - default makefile generator: `Unix Makefiles`**
-
-```sh
-cd "${PATH_TO_REPO}"
-rm --verbose --recursive "${DEBUG_BUILD_DIR_NAME}"
-mkdir "${DEBUG_BUILD_DIR_NAME}"
-cd "${DEBUG_BUILD_DIR_NAME}"
-pwd
-ls
-ls ..
-cmake -DCMAKE_BUILD_TYPE=Debug .. # Equivalent commands:
-#   'cmake ..'
-#   'cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ..'
-#  explicitly specifying the build version. In CMake, the 'Debug' build variant explicitly specified in option '-DCMAKE_BUILD_TYPE=Debug' is being chosen by default. On Linux, the makefile generator "Unix Makefiles" is being chosen by default on Linux systems, which is a single-config generator.
-cmake --build . # Equivalent command for "Unix Makefiles" generator:
-#   'cmake --build . --config Debug'
-#  explicitly specifying the build version. The 'Debug' version, as it is the default option. "Unix Makefiles" generator is a single-config generator, and as such at building the project it takes into account the value of the variable 'CMAKE_BUILD_TYPE'
-ls
-ldd "${EXECUTABLE_NAME}"
-./${EXECUTABLE_NAME}
-```
-
-**Windows: Git Bash - default makefile generator: `Visual Studio 17 2022`**
-
-```sh
-cd "${PATH_TO_REPO}"
-rm --verbose --recursive "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
-mkdir "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
-cd "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
-pwd
-ls
-ls ..
-cmake -DCMAKE_BUILD_TYPE=Debug .. # On Windows, the makefile generator "Visual Studio 17 2022" is being chosen by default, which is a multi-config generator - see 'cmake --help' in section 'Generators': the asterisk left to a generator marks the default one - as long as Visual Studio 2022 or related Build Tools are installed. For specifying the makefile generator explicitly, use the '-G' option: 
-#   'cmake -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Debug ..' (generates the SLN project file) or 
-#   'cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug ..'
-cmake --build . # Equivalent command for "Visual Studio 17 2022" makefile generator:
-#   'cmake --build . --config Debug'
-#  would work equivalently too for building the generated Debug version, as it is the default option, but being explicit is cross-compatible among single-config and multi-config makefile generators, releasing the developer from mental effort which makefile generator is of which type
-ls
-ldd ./Debug/${EXECUTABLE_NAME}
-Dependencies.exe -depth 1 -chain ./Debug/${EXECUTABLE_NAME}.exe # Requires 'Dependencies' utility
-./Debug/${EXECUTABLE_NAME}
-```
-
-**Windows: PowerShell - default makefile generator: `Visual Studio 17 2022`**
+After making changes to the project, we don't need to go through the entire procedure. This one-liner command in the _Developer PowerShell for VS 2022_ is sufficient for the changes to be built into the executable.
 
 ```powershell
-cd "${PATH_TO_REPO}"
-Remove-Item -Verbose -Recurse -Path "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
-mkdir "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
-cd "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
-pwd
-ls
-ls ..
-cmake -DCMAKE_BUILD_TYPE=Debug ..
-cmake --build .
-ls
-Dependencies.exe -depth 1 -chain ./Debug/${EXECUTABLE_NAME}.exe
-& ./Debug/${EXECUTABLE_NAME} # Launching an executable on a given path that has a variable in it requires adding a call operator '&' to expand each variable
+cd "${HOME}\git\vscode_cpp_cmake_example_project\build\" ; cmake .. ; cmake --build . ; .\Debug\my_cpp_project.exe
 ```
 
-**Windows: Command Prompt - default makefile generator: `Visual Studio 17 2022`**
+#### Linux - build instructions
 
-```bat
-cd "%PATH_TO_REPO%"
-rmdir /s /q "%MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME%"
-mkdir "%MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME%"
-cd "%MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME%"
-cd
-dir
-dir ..
-cmake -DCMAKE_BUILD_TYPE=Debug ..
-cmake --build . --config Debug
-dir
-Dependencies.exe -depth 1 -chain .\Debug\%EXECUTABLE_NAME%.exe
-.\Debug\%EXECUTABLE_NAME%
-```
-
-The utility `Dependencies.exe` is the executable of **_Dependencies_** utility - an ancestor of **_Dependency Walker_**  - which is the equivalent of `ldd` on Linux/UNIX systems. Download from [direct link](https://github.com/lucasg/Dependencies/releases/latest/download/Dependencies_x64_Release.zip) or via [homepage](https://github.com/lucasg/Dependencies) . Extract the archive to a separate directory, put it to a place among other explicitly installed utilities e.g. `C:\utils\Dependencies_x64_Release\` , add this path to the `Path` system environment variable in `Advanced system settings -> Environment Variables...` and open another shell/command prompt to use the updated settings.  
-Alternatively, there is **_Process Explorer_** that let's you see the dependencies of an executable at runtime. Download from [direct link](https://download.sysinternals.com/files/ProcessExplorer.zip) or via [homepage](https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer)
-
-**Incremental Debug Build One-Liner**
-
-**_Linux terminal - default makefile generator: `Unix Makefiles`_**
-
-```sh
-date && cd "${PATH_TO_REPO}/${DEBUG_BUILD_DIR_NAME}" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . --config Debug && ./${EXECUTABLE_NAME}
-```
-
-**_Windows: Git Bash - default makefile generator: `Visual Studio 17 2022`_**
-
-```sh
-date && cd "${PATH_TO_REPO}/${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . --config Debug && ./Debug/${EXECUTABLE_NAME}
-```
-
-**_Windows: PowerShell - default makefile generator: `Visual Studio 17 2022`_**
-
-```powershell
-# with forward slashes, with or without extension: forward slashes without extension prefered for compatibility
-date; cd "${PATH_TO_REPO}/${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"; cmake -DCMAKE_BUILD_TYPE=Debug ..; cmake --build . --config Debug; & ./Debug/${EXECUTABLE_NAME}
-date; cd "${PATH_TO_REPO}/${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"; cmake -DCMAKE_BUILD_TYPE=Debug ..; cmake --build . --config Debug; & ./Debug/${EXECUTABLE_NAME}.exe
-# or with backward slashes
-date; cd "${PATH_TO_REPO}\${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"; cmake -DCMAKE_BUILD_TYPE=Debug ..; cmake --build . --config Debug; & .\Debug\${EXECUTABLE_NAME}
-date; cd "${PATH_TO_REPO}\${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"; cmake -DCMAKE_BUILD_TYPE=Debug ..; cmake --build . --config Debug; & .\Debug\${EXECUTABLE_NAME}.exe
-```
-
-**_Windows: Command Prompt - default makefile generator: `Visual Studio 17 2022`_**
-
-```bat
-date /t && cd "%PATH_TO_REPO%\%MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME%" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . --config Debug && .\Debug\%EXECUTABLE_NAME%
-```
-
-#### Notes
-
-Set a breakpoint on an arbitrary nonempty line inside a function's body. Then run a debugger with `F5`. The debugger launches the executable, attaches to it, and the execution halts at the breakpoint.
-
-### Release
-
-**Linux terminal - default makefile generator: `Unix Makefiles`**
-
-```sh
-cd "${PATH_TO_REPO}"
-rm --verbose --recursive "${RELEASE_BUILD_DIR_NAME}"
-mkdir "${RELEASE_BUILD_DIR_NAME}"
-cd "${RELEASE_BUILD_DIR_NAME}"
-pwd
-ls
-ls ..
-cmake -DCMAKE_BUILD_TYPE=Release .. # Equivalent command:
-#   'cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..' . Uses "Unix Makefiles" as default makefile generator on Linux systems
-cmake --build . # Equivalent command for "Unix Makefiles" generator:
-#   'cmake --build . --config Release' 
-#  "Unix Makefiles" generator is a single-configuration makefile generator, and as such takes into consideration the value of 'CMAKE_BUILD_TYPE' during CMake generation phase in previous command, making the explicitly specified '--config' option superfluous.
-ls
-ldd ${EXECUTABLE_NAME}
-./${EXECUTABLE_NAME}
-```
-
-**Windows: Git Bash - default makefile generator: `Visual Studio 17 2022`**
-
-```sh
-cd "${PATH_TO_REPO}"
-rm --verbose --recursive "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
-mkdir "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
-cd "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
-pwd
-ls
-ls ..
-cmake -DCMAKE_BUILD_TYPE=Release .. # Equivalent command:
-#   'cmake -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release ..'
-cmake --build . --config Release # The '--config Release' option needs to be specified explicitly, otherwise the 'Debug' binary gets built by default. As the "Visual Studio 17 2022" makefile generator - the default generator on Windows - is a multi-config makefile generator, an as such it needs an explicitly specified build type when other than the default 'Debug' type is wanted to produce the desired executable type, overriding the default 'Debug' build type setting.
-ls
-ldd ./Release/${EXECUTABLE_NAME}
-Dependencies.exe -depth 1 -chain ./Release/${EXECUTABLE_NAME}.exe
-./Release/${EXECUTABLE_NAME}
-```
-
-**Windows: PowerShell - default makefile generator: `Visual Studio 17 2022`**
-
-```powershell
-cd "${PATH_TO_REPO}"
-Remove-Item -Verbose -Recurse -Path "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
-mkdir "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
-cd "${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"
-pwd
-ls
-ls ..
-cmake -DCMAKE_BUILD_TYPE=Release ..
-cmake --build . --config Release
-ls
-Dependencies.exe -depth 1 -chain ./Release/${EXECUTABLE_NAME}.exe
-& ./Release/${EXECUTABLE_NAME}
-```
-
-**Windows: Command Prompt - default makefile generator: `Visual Studio 17 2022`**
-
-```bat
-cd "%PATH_TO_REPO%"
-rmdir /s /q "%MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME%"
-mkdir "%MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME%"
-cd "%MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME%"
-cd
-dir
-dir ..
-cmake -DCMAKE_BUILD_TYPE=Release ..
-cmake --build . --config Release
-dir
-Dependencies.exe -depth 1 -chain .\Release\%EXECUTABLE_NAME%.exe
-.\Release\%EXECUTABLE_NAME%
-```
-
-**Incremental Release Build One-Liner**
-
-**_Linux terminal_**
-
-```sh
-date && cd "${PATH_TO_REPO}/${RELEASE_BUILD_DIR_NAME}" && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . --config Release && ./${EXECUTABLE_NAME}
-```
-
-**_Windows: Git Bash_**
-
-```sh
-date && cd "${PATH_TO_REPO}/${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}" && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . --config Release && ./Release/${EXECUTABLE_NAME}
-```
-
-**_Windows: PowerShell_**
-
-```powershell
-# with forward slashes, with or without extension: forward slashes without extension prefered for compatibility
-date; cd "${PATH_TO_REPO}/${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"; cmake -DCMAKE_BUILD_TYPE=Release ..; cmake --build . --config Release; & ./Release/${EXECUTABLE_NAME}
-date; cd "${PATH_TO_REPO}/${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"; cmake -DCMAKE_BUILD_TYPE=Release ..; cmake --build . --config Release; & ./Release/${EXECUTABLE_NAME}.exe
-# or with backward slashes
-date; cd "${PATH_TO_REPO}\${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"; cmake -DCMAKE_BUILD_TYPE=Release ..; cmake --build . --config Release; & .\Release\${EXECUTABLE_NAME}
-date; cd "${PATH_TO_REPO}\${MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME}"; cmake -DCMAKE_BUILD_TYPE=Release ..; cmake --build . --config Release; & .\Release\${EXECUTABLE_NAME}.exe
-```
-
-**_Windows: Command Prompt_**
-
-```bat
-date /t && cd "%PATH_TO_REPO%\%MULTI_CONFIG_GENERATOR_BUILD_DIR_NAME%" && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build . --config Release && .\Release\%EXECUTABLE_NAME%
-```
-
-## Notes
-
-The autocompletion and `Ctrl + click`/`F12` reference resolution works after first configuration/generation of the project. The `clangd` picks up the generated `compile_commands.json` from the `build` directory and starts completing with `Ctrl + Space`.
-
-## VCS
-
-Check repo status
-
-`date && git branch && git status && git diff`
-
-## CMake: Scanning for kits in VSCode
-
-After opening a directory with a CMake project in VSCode, the `CMake Tools` VSCode extension prompts you to select kit.  
-Choose one from the drop down menu from the command bar.
-
-Configuration for all locally available kits will be stored in  
-`/home/laptop/.local/share/CMakeTools/cmake-tools-kits.json`
-
-Example CMake output after toolchain kit configuration:
+Open _Terminal_
 
 ```
-[proc] Executing command: /usr/bin/cmake --version
-[proc] Executing command: /usr/bin/cmake -E capabilities
-[kit] Successfully loaded 3 kits from /home/laptop/.local/share/CMakeTools/cmake-tools-kits.json
-[variant] Loaded new set of variants
-[proc] Executing command: /usr/bin/gcc -v
-[main] Configuring project: roboauto_assignment 
-[proc] Executing command: /usr/bin/cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ --no-warn-unused-cli -S/home/laptop/git/kyberdrb/vscode_cpp_cmake_minimal_project -B/home/laptop/git/kyberdrb/vscode_cpp_cmake_minimal_project/build -G Ninja
-[cmake] Not searching for unused variables given on the command line.
-[cmake] -- The C compiler identification is GNU 14.2.1
-[cmake] -- The CXX compiler identification is GNU 14.2.1
-[cmake] -- Detecting C compiler ABI info
-[cmake] -- Detecting C compiler ABI info - done
-[cmake] -- Check for working C compiler: /usr/bin/gcc - skipped
-[cmake] -- Detecting C compile features
-[cmake] -- Detecting C compile features - done
-[cmake] -- Detecting CXX compiler ABI info
-[cmake] -- Detecting CXX compiler ABI info - done
-[cmake] -- Check for working CXX compiler: /usr/bin/g++ - skipped
-[cmake] -- Detecting CXX compile features
-[cmake] -- Detecting CXX compile features - done
-[cmake] -- Configuring done (1.2s)
-[cmake] -- Generating done (0.0s)
-[cmake] -- Build files have been written to: /home/laptop/git/kyberdrb/vscode_cpp_cmake_minimal_project/build
-[main] Configuring project: roboauto_assignment 
-[proc] Executing command: /usr/bin/cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ --no-warn-unused-cli -S/home/laptop/git/kyberdrb/vscode_cpp_cmake_minimal_project -B/home/laptop/git/kyberdrb/vscode_cpp_cmake_minimal_project/build -G Ninja
-[cmake] Not searching for unused variables given on the command line.
-[cmake] -- Configuring done (0.1s)
-[cmake] -- Generating done (0.0s)
-[cmake] -- Build files have been written to: /home/laptop/git/kyberdrb/vscode_cpp_cmake_minimal_project/build
+TODO build commands
 ```
 
-Example content of `/home/laptop/.local/share/CMakeTools/cmake-tools-kits.json`
+##### Incremental build
 
 ```
-$ cat ~/.local/share/CMakeTools/cmake-tools-kits.json
-[
-  {
-    "name": "Clang 18.1.8 x86_64-pc-linux-gnu",
-    "compilers": {
-      "C": "/usr/bin/clang",
-      "CXX": "/usr/bin/clang++"
-    },
-    "isTrusted": true
-  },
-  {
-    "name": "Clang-cl 18.1.8 x86_64-pc-windows-msvc",
-    "compilers": {
-      "C": "/usr/bin/clang-cl",
-      "CXX": "/usr/bin/clang-cl"
-    },
-    "isTrusted": true
-  },
-  {
-    "name": "GCC 14.2.1 x86_64-pc-linux-gnu",
-    "compilers": {
-      "C": "/usr/bin/gcc",
-      "CXX": "/usr/bin/g++"
-    },
-    "isTrusted": true
-  }
-]
+TODO build command
 ```
 
-## Project structure
+#### macOS - build instructions
+
+Open _Terminal_
 
 ```
-my_cpp_project/
-├── .vscode/
-│   ├── settings.json    # For clangd configuration and IntelliSense
-│   ├── launch.json      # For debugging configuration
-├── src/                 # Directory for source files
-│   └── main.cpp         # Main source file - the entry point
-├── build-Debug/         # For configuring Clangd language server
-│   └── my_cpp_project   # Built binary for Debug version
-├── build-Release/       # For configuring Clangd language server
-│   └── my_cpp_project   # Built binary for Release version
-├── .clangd              # For configuring Clangd language server
-├── .gitignore           # For ommitting generated/compiled files
-├── CMakeLists.txt       # CMake build configuration
-└── README.md            # Project description, build instructions
+TODO build commands
 ```
 
-## AI models
-
-Below are models that I use for C++ development assistance. Online providers for private or debranded code, local AI for business sensitive code.
-
-Recommended AI providers and models for C++ development (2025/04/18):
-
-- Remote AI: Claude 3.7 Sonet
-- Local AI: DeepSeek Coder V2 Lite Instruct Q5_K_S [bartowski] ([direct link](https://huggingface.co/bartowski/DeepSeek-Coder-V2-Lite-Instruct-GGUF/resolve/main/DeepSeek-Coder-V2-Lite-Instruct-Q5_K_S.gguf?download=true)/[home page](https://huggingface.co/bartowski/DeepSeek-Coder-V2-Lite-Instruct-GGUF)): for the laptop version of RTX 4060 8GB, i9-14900HX, 64GB RAM (32GB free) - and even then it consumes additional ~4GB from the RAM
-    - TODO add concrete parameters from LM Studio (Windows 11 24H2)
-
-## AI answers/help/guidance/scaffolding
-
-## What would an absolute minimal CMake C++ project look like in VSCode with clangd IntelliSense autocompletion and debugging support?
-
-An absolute minimal C++ project setup with CMake, `clangd` for IntelliSense/autocompletion, and debugging support in VS Code would focus on the essential configurations. This setup provides just the bare minimum to get autocompletion, build, and debug capabilities without unnecessary complexity.
-
-### Project Structure
+##### Incremental build
 
 ```
-my_cpp_project/
-├── .vscode/
-│   ├── settings.json    # For clangd configuration and IntelliSense
-│   ├── launch.json      # For debugging configuration
-├── src/
-│   └── main.cpp         # Main source file
-├── CMakeLists.txt       # CMake build configuration
-└── README.md            # (optional)
+TODO build command
 ```
 
-### 1. **C++ Source File**
+### Making Changes
 
-Start with a simple `main.cpp` that can be compiled and run.
+- Edit-Build-Run workflow - incremental build one-liners
 
-**src/main.cpp**
-```cpp
-#include <iostream>
+- Simple debugging: F5, launch.json
 
-int main() {
-    std::cout << "Hello, VS Code + CMake + clangd!" << std::endl;
-    return 0;
-}
-```
+## VSCode Project configuration
 
-### 2. **CMakeLists.txt**
+settings.json
 
-This is the minimum required CMake configuration to build the project and generate the `compile_commands.json` file that `clangd` requires for autocompletion.
+## Build Instructions - The Path of Ninja - Advanced Guide
 
-**CMakeLists.txt**
-```cmake
-cmake_minimum_required(VERSION 3.10)
-
-# Project name and version
-project(MyCppProject VERSION 1.0)
-
-# Specify C++ standard
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-# Specify the source file to compile
-add_executable(my_cpp_project src/main.cpp)
-
-# Enable compile_commands.json generation for clangd
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-```
-
-### 3. **VS Code Configuration Files**
-
-#### 3.1 **settings.json** (for `clangd`)
-
-This file ensures that VS Code uses `clangd` for autocompletion and associates the `compile_commands.json` file correctly.
-
-**.vscode/settings.json**
-```json
-{
-    "files.associations": {
-        "CMakeLists.txt": "cmake"
-    },
-    "C_Cpp.intelliSenseEngine": "disabled",  // Disable MSVC IntelliSense in favor of clangd
-    "clangd.arguments": [
-        "--compile-commands-dir=build"       // Tell clangd to use compile_commands.json from build directory
-    ]
-}
-```
-
-#### 3.2 **launch.json** (for debugging)
-
-To configure GDB debugging within VS Code, you need a `launch.json` file. This example assumes the program is built and outputs the binary in the `build/` directory.
-
-**.vscode/launch.json**
-```json
-{
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "(gdb) Launch",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/my_cpp_project",  // Location of the compiled executable
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "miDebuggerPath": "/usr/bin/gdb",                      // Path to GDB
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ]
-        }
-    ]
-}
-```
-
-### 4. **Building the Project**
-
-To build the project, you can use terminal commands directly:
-
-1. Create the build directory:
-   ```bash
-   mkdir build && cd build
-   ```
-
-2. Run CMake to generate the necessary files, including `compile_commands.json`:
-   ```bash
-   cmake ..
-   ```
-
-3. Build the project:
-   ```bash
-   cmake --build .
-   ```
-
-After the project is built, `compile_commands.json` will be available in the `build/` directory, and `clangd` will use it for autocompletion.
-
-### 5. **Debugging the Project**
-
-Once the project is built, you can debug it using VS Code’s built-in debugger:
-
-1. Click on the "Run and Debug" section in the VS Code sidebar.
-2. Choose the "(gdb) Launch" configuration from `launch.json`.
-3. Hit the green play button to start debugging.
-
-### Summary of Steps
-
-1. **IntelliSense (Code Completion) with clangd**:
-    - Ensure that the `compile_commands.json` file is generated by CMake (`set(CMAKE_EXPORT_COMPILE_COMMANDS ON)` in `CMakeLists.txt`).
-    - Configure VS Code to use `clangd` for autocompletion by setting up `.vscode/settings.json`.
-  
-2. **Build**:
-    - Run CMake to configure the project and then build it.
-  
-3. **Debug**:
-    - Configure `launch.json` for debugging with GDB, and start debugging using the VS Code interface.
-
-This is the minimal setup for working with CMake, `clangd`, and debugging in VS Code for a C++ project. Once everything is working, you can further customize the build, debugging tasks, and settings as needed.
-
-## Do I need to install any extensions?
-
-Yes, to fully leverage Visual Studio Code as a C++ IDE with the setup you've described, you'll need to install some extensions for code completion, debugging, and CMake support. Here are the key extensions to install:
-
-### 1. **CMake Tools**
-   - **Name**: `CMake Tools`
-   - **Publisher**: Microsoft
-   - **Purpose**: This extension simplifies working with CMake projects by providing features like configuring, building, and debugging directly from the VS Code interface.
-   - **Installation**: Search for "CMake Tools" in the Extensions tab of VS Code (`Ctrl+Shift+X`), or install it from the marketplace:
-     ```
-     ext install ms-vscode.cmake-tools
-     ```
-
-### 2. **C/C++ Extension (Optional, if using `clangd` for IntelliSense)**
-   - **Name**: `C/C++`
-   - **Publisher**: Microsoft
-   - **Purpose**: Provides IntelliSense, code navigation, and debugging for C++ projects. While you're using `clangd` for code completion, this extension provides debugging support with `launch.json` configuration.
-   - **Installation**: You can search for "C/C++" in the Extensions tab or install it with:
-     ```
-     ext install ms-vscode.cpptools
-     ```
-
-   **Note**: If you are relying on `clangd` for autocompletion, you can disable IntelliSense from this extension to avoid conflicts (`"C_Cpp.intelliSenseEngine": "disabled"` in `settings.json`).
-
-### 3. **Clangd**
-   - **Name**: `clangd`
-   - **Publisher**: llvm-vs-code-extensions
-   - **Purpose**: This extension provides powerful autocompletion, error checking, and code navigation for C++ projects. It relies on the `compile_commands.json` file generated by CMake for accurate information.
-   - **Installation**: Install via the Extensions tab in VS Code, or run:
-     ```
-     ext install llvm-vs-code-extensions.vscode-clangd
-     ```
-
-### 4. **CMake Language Support (Optional)**
-   - **Name**: `CMake`
-   - **Publisher**: twxs
-   - **Purpose**: Provides syntax highlighting and basic IntelliSense for CMake scripts (`CMakeLists.txt`).
-   - **Installation**: You can install it from the Extensions tab, or run:
-     ```
-     ext install twxs.cmake
-     ```
-
-### 5. **CodeLLDB (Optional for Debugging)**
-   - **Name**: `CodeLLDB`
-   - **Publisher**: Vadim Chugunov
-   - **Purpose**: If you prefer using `lldb` as your debugger (instead of GDB), this extension provides VS Code integration for LLDB.
-   - **Installation**: You can install it via:
-     ```
-     ext install vadimcn.vscode-lldb
-     ```
-
-### Steps to Install Extensions:
-1. Open the Extensions view (`Ctrl+Shift+X`).
-2. Search for the names listed above.
-3. Click **Install** next to the relevant extensions.
-
-### Summary of Required Extensions
-- **Essential**:
-  - `CMake Tools`
-  - `clangd`
-  
-- **Optional**:
-  - `C/C++` (if you want VS Code’s debugger integration)
-  - `CodeLLDB` (if you prefer LLDB over GDB)
-  - `CMake` (for CMake syntax highlighting)
-
-This setup ensures you have code completion (via `clangd`), easy CMake integration, and debugging support for GDB (or LLDB).
-
-## Can you please elaborate in more detail about the debugging configuration? Which extensions would you install, what files would you edit, regarding previous response?
-
-Yes, to fully leverage Visual Studio Code as a C++ IDE with the setup you've described, you'll need to install some extensions for code completion, debugging, and CMake support. Here are the key extensions to install:
-
-### 1. **CMake Tools**
-   - **Name**: `CMake Tools`
-   - **Publisher**: Microsoft
-   - **Purpose**: This extension simplifies working with CMake projects by providing features like configuring, building, and debugging directly from the VS Code interface.
-   - **Installation**: Search for "CMake Tools" in the Extensions tab of VS Code (`Ctrl+Shift+X`), or install it from the marketplace:
-     ```
-     ext install ms-vscode.cmake-tools
-     ```
-
-### 2. **C/C++ Extension (Optional, if using `clangd` for IntelliSense)**
-   - **Name**: `C/C++`
-   - **Publisher**: Microsoft
-   - **Purpose**: Provides IntelliSense, code navigation, and debugging for C++ projects. While you're using `clangd` for code completion, this extension provides debugging support with `launch.json` configuration.
-   - **Installation**: You can search for "C/C++" in the Extensions tab or install it with:
-     ```
-     ext install ms-vscode.cpptools
-     ```
-
-   **Note**: If you are relying on `clangd` for autocompletion, you can disable IntelliSense from this extension to avoid conflicts (`"C_Cpp.intelliSenseEngine": "disabled"` in `settings.json`).
-
-### 3. **Clangd**
-   - **Name**: `clangd`
-   - **Publisher**: llvm-vs-code-extensions
-   - **Purpose**: This extension provides powerful autocompletion, error checking, and code navigation for C++ projects. It relies on the `compile_commands.json` file generated by CMake for accurate information.
-   - **Installation**: Install via the Extensions tab in VS Code, or run:
-     ```
-     ext install llvm-vs-code-extensions.vscode-clangd
-     ```
-
-### 4. **CMake Language Support (Optional)**
-   - **Name**: `CMake`
-   - **Publisher**: twxs
-   - **Purpose**: Provides syntax highlighting and basic IntelliSense for CMake scripts (`CMakeLists.txt`).
-   - **Installation**: You can install it from the Extensions tab, or run:
-     ```
-     ext install twxs.cmake
-     ```
-
-### 5. **CodeLLDB (Optional for Debugging)**
-   - **Name**: `CodeLLDB`
-   - **Publisher**: Vadim Chugunov
-   - **Purpose**: If you prefer using `lldb` as your debugger (instead of GDB), this extension provides VS Code integration for LLDB.
-   - **Installation**: You can install it via:
-     ```
-     ext install vadimcn.vscode-lldb
-     ```
-
-### Steps to Install Extensions:
-1. Open the Extensions view (`Ctrl+Shift+X`).
-2. Search for the names listed above.
-3. Click **Install** next to the relevant extensions.
-
-### Summary of Required Extensions
-- **Essential**:
-  - `CMake Tools`
-  - `clangd`
-  
-- **Optional**:
-  - `C/C++` (if you want VS Code’s debugger integration)
-  - `CodeLLDB` (if you prefer LLDB over GDB)
-  - `CMake` (for CMake syntax highlighting)
-
-This setup ensures you have code completion (via `clangd`), easy CMake integration, and debugging support for GDB (or LLDB).
-
-## When I open Run and Debug (Ctrl + Shift + D) side menu and click on Start Debugging (F5) I receive a prompt Configured debug type 'cppdbg' is not supported.
-
-The error message `"Configured debug type 'cppdbg' is not supported"` usually happens when the **C/C++ extension by Microsoft** is not installed or not recognized correctly, as this extension provides the `cppdbg` debug type for GDB and LLDB debugging.
-
-Here’s a step-by-step guide to resolve this issue:
-
-### 1. **Verify the Installation of the `C/C++` Extension**
-   - Make sure that you have the `C/C++` extension by Microsoft installed:
-     - Go to the **Extensions** view (`Ctrl+Shift+X`).
-     - Search for **C/C++** (by Microsoft).
-     - If it’s not installed, install it by clicking **Install**.
-     - If it’s already installed, try uninstalling and reinstalling it to ensure that it works correctly.
-
-     You can also install it manually via the command:
-     ```bash
-     ext install ms-vscode.cpptools
-     ```
-
-### 2. **Disable Conflicting IntelliSense (Optional)**
-   - If you are using `clangd` for autocompletion, it might conflict with the IntelliSense engine provided by the `C/C++` extension.
-   - To resolve this, you can disable the IntelliSense feature of the `C/C++` extension without affecting its debugging capabilities:
-     - Open **Settings** (`Ctrl+,`).
-     - Search for `C_Cpp.intelliSenseEngine`.
-     - Set `"C_Cpp.intelliSenseEngine": "disabled"` in your `settings.json`.
-
-### 3. **Check the `launch.json` Configuration**
-   - Ensure that your `.vscode/launch.json` file is correctly set up for `cppdbg`. Here's an example `launch.json` for GDB debugging:
-
-     ```json
-     {
-       "version": "0.2.0",
-       "configurations": [
-         {
-           "name": "(gdb) Launch",
-           "type": "cppdbg",         // This requires the C/C++ extension
-           "request": "launch",
-           "program": "${workspaceFolder}/build/my_cpp_project",  // Path to the executable
-           "args": [],
-           "stopAtEntry": false,
-           "cwd": "${workspaceFolder}",
-           "environment": [],
-           "externalConsole": false,  // Change to true if you prefer an external terminal
-           "MIMode": "gdb",          // For GDB debugging
-           "miDebuggerPath": "/usr/bin/gdb",  // Ensure this path is correct for GDB
-           "setupCommands": [
-             {
-               "description": "Enable pretty-printing for gdb",
-               "text": "-enable-pretty-printing",
-               "ignoreFailures": true
-             }
-           ]
-         }
-       ]
-     }
-     ```
-
-### 4. **Reload VS Code**
-   - After installing the `C/C++` extension, restart VS Code to ensure all settings are loaded properly.
-     - You can use the **Command Palette** (`Ctrl+Shift+P`) and type `Reload Window`.
-
-### 5. **Install `CodeLLDB` for LLDB (if Needed)**
-   - If you prefer using `LLDB` instead of `GDB`, ensure that the **CodeLLDB** extension is installed:
-     ```bash
-     ext install vadimcn.vscode-lldb
-     ```
-   - Update the `launch.json` file to use `lldb` instead of `gdb`:
-     ```json
-     "MIMode": "lldb",
-     "miDebuggerPath": "/usr/bin/lldb"  // Adjust the path to LLDB if necessary
-     ```
-
-### 6. **Alternative: CMake Tools Debugging**
-   - If you're using **CMake Tools**, you can also let it manage your debugging configuration automatically. 
-   - Run the following commands from the Command Palette (`Ctrl+Shift+P`):
-     - **CMake: Configure**: Sets up the project.
-     - **CMake: Build**: Builds the project.
-     - **CMake: Debug**: This will automatically start the debugger with appropriate settings.
-
-### Final Check
-1. After ensuring the `C/C++` extension is installed and your `launch.json` is configured, go back to the **Run and Debug** view (`Ctrl+Shift+D`).
-2. Select the configuration (e.g., `(gdb) Launch`) and press **F5** or click **Start Debugging**.
-
-This should resolve the `"cppdbg not supported"` issue and allow you to run the debugger for your C++ project in Visual Studio Code.
-
-## I installed the ms-vscode.cpptools extension. I set the breakpoint before he return statement in main.cpp. But when I run the executable, it executed completely and hadn't stopped at the breakpoint. What do I need to do to make the debugger stop at the breakpoint?
-
-If the debugger is not stopping at the breakpoint, there are a few common causes and potential solutions to get it working:
-
-### 1. **Ensure the Program is Built with Debug Information**
-   - In order for the debugger to stop at breakpoints, the program must be compiled with debug symbols enabled. When using CMake, make sure you are building your project in **Debug** mode.
-   - Update your `CMakeLists.txt` to include debug information:
-
-     ```cmake
-     set(CMAKE_BUILD_TYPE Debug)  # This ensures the Debug build type
-     ```
-
-     - Alternatively, you can configure CMake from the terminal or in VSCode with a Debug flag:
-       ```bash
-       cmake -DCMAKE_BUILD_TYPE=Debug ..
-       ```
-   - This tells the compiler to include debugging information in the compiled binary. Specifically, it will add the `-g` flag for GCC/Clang, which is essential for debugging.
-
-### 2. **Check the Build Output**
-   - Ensure that your executable is built with the correct flags by inspecting the compiler output. You should see the `-g` flag in the compile commands.
-   - If you are using **CMake Tools** in VSCode, make sure the active build type is **Debug**:
-     - Go to the **Command Palette** (`Ctrl+Shift+P`) and select **CMake: Set Build Type**.
-     - Choose **Debug**.
-     - Then run **CMake: Build** to build the project with debug symbols.
-
-### 3. **Ensure Breakpoint is Valid**
-   - Ensure the breakpoint is set on a valid line of code that will be executed. For example, breakpoints cannot be set on blank lines, comments, or lines that don't generate machine instructions.
-   - Move the breakpoint to a line that contains actual code execution.
-
-### 4. **Use the Correct Program Path in `launch.json`**
-   - Ensure that your `launch.json` configuration is pointing to the correct executable file.
-   - If your executable is being generated in a different folder (like `build`), make sure the path is correct:
-     ```json
-     "program": "${workspaceFolder}/build/my_cpp_project",  // Ensure this points to the actual executable
-     ```
-
-### 5. **Rebuild the Project**
-   - After making any changes to `CMakeLists.txt` or build type, it’s a good idea to clean and rebuild the project to ensure that all files are compiled with debug symbols:
-     ```bash
-     cmake --build . --clean-first
-     ```
-
-### 6. **Check the `launch.json` Configuration**
-   - Double-check that your `launch.json` file is properly set up to handle debugging with `cppdbg`. Here’s an example of a typical setup:
-     ```json
-     {
-       "version": "0.2.0",
-       "configurations": [
-         {
-           "name": "(gdb) Launch",
-           "type": "cppdbg",
-           "request": "launch",
-           "program": "${workspaceFolder}/build/my_cpp_project",  // Path to the built executable
-           "args": [],
-           "stopAtEntry": false,
-           "cwd": "${workspaceFolder}",
-           "environment": [],
-           "externalConsole": false,   // true if you want an external console
-           "MIMode": "gdb",            // Use gdb for debugging
-           "miDebuggerPath": "/usr/bin/gdb",  // Make sure gdb is correctly installed
-           "setupCommands": [
-             {
-               "description": "Enable pretty-printing for gdb",
-               "text": "-enable-pretty-printing",
-               "ignoreFailures": true
-             }
-           ],
-           "preLaunchTask": "build",   // Optional: ensure build before debugging
-           "postDebugTask": "clean"    // Optional: clean after debugging
-         }
-       ]
-     }
-     ```
-
-### 7. **Prelaunch Build (Optional)**
-   - If you want to make sure that the project is always built before debugging, you can add a `preLaunchTask` in the `launch.json`:
-     ```json
-     "preLaunchTask": "build"
-     ```
-   - Then, in the `.vscode/tasks.json` file, configure a build task like this:
-     ```json
-     {
-       "version": "2.0.0",
-       "tasks": [
-         {
-           "label": "build",
-           "type": "shell",
-           "command": "cmake --build .",  // or your preferred build command
-           "group": {
-             "kind": "build",
-             "isDefault": true
-           }
-         }
-       ]
-     }
-     ```
-
-### 8. **Check for Optimizations**
-   - If your code was built with optimizations (e.g., `-O2` or `-O3`), the compiler might have optimized away certain code, making it difficult for the debugger to stop at the desired breakpoints.
-   - Make sure optimizations are disabled in Debug mode:
-     ```cmake
-     set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")  // Disable optimizations in Debug mode
-     ```
-
-### 9. **Reload the Debugger**
-   - If you’re still having trouble, try restarting Visual Studio Code or reloading the debugger window (`Ctrl+Shift+P` and then select **Reload Window**).
-
-Once you’ve ensured that the project is built with the necessary debug symbols and the `launch.json` is properly configured, the debugger should stop at the breakpoints as expected.
-
-## I rerun the CMake to instruct the compiler to include debug information to the binary with cmake -DCMAKE_BUILD_TYPE=Debug .. from within the build directory, as you suggested. Then I run the debugger with F5 and the debugger stopped at the breakpoint :)
-
-Great to hear that the debugger stopped at the breakpoint! 🎉 It sounds like adding the debug symbols with `cmake -DCMAKE_BUILD_TYPE=Debug` did the trick. Now that your setup is working, you should be able to:
-
-- Set additional breakpoints and step through your code.
-- Inspect variables and memory.
-- Continue building and debugging your project in VSCode efficiently.
-
-If you encounter any more issues or need further customization (e.g., using `Valgrind`, `perf`, or any other tools), feel free to ask! Happy coding! 😊
-
-## Workflow utilities/commands/scripts
-
-Some of the commands had been extracted from CLion IDE
-
-### CMake: clean target's build dir
-
-Debug
-
-`cmake --build ./cmake-build-debug/ --target clean`  
-or wipe build dir  
-`rm -rf ./cmake-build-debug/`
-
-Release
-
-`cmake --build ./cmake-build-release/ --target clean`  
-or wipe build dir  
-`rm -rf ./cmake-build-release/`
-
-### CMake: generate Ninja makefiles
-
-```
-PATH_TO_PROJECT="/path/to/project"
-```
-
-Debug
-
-`/usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -G Ninja -S ${PATH_TO_PROJECT} -B ${PATH_TO_PROJECT}/cmake-build-debug`
-
-Release
-
-`/usr/bin/cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -G Ninja -S ${PATH_TO_PROJECT} -B ${PATH_TO_PROJECT}/cmake-build-release`
-
-### CMake: Build
-
-Debug
-
-`/usr/bin/cmake --build ${PATH_TO_PROJECT}/cmake-build-debug --target Observer-Push-Concrete_Subject_and_Observers-Single_file -j $(nproc)`
-
-Release
-
-`/usr/bin/cmake --build ${PATH_TO_PROJECT}/cmake-build-release --target Observer-Push-Concrete_Subject_and_Observers-Single_file -j $(nproc)`
-
-### Run
-
-Debug
-
-`${PATH_TO_PROJECT}/cmake-build-debug/Observer-Push-Concrete_Subject_and_Observers-Single_file`
-
-Release
-
-`${PATH_TO_PROJECT}/cmake-build-release/Observer-Push-Concrete_Subject_and_Observers-Single_file`
-
-### Debug
-
-Debug
-
-Set a breakpoint and then press `F5`. Inspect variables, set more breakpoints and adjust code as needed.
-
-`gdb`
-
-### Valgrind - memory sanitizer
-
-Debug
-
-`${PATH_TO_PROJECT}/cmake-build-debug/Observer-Push-Concrete_Subject_and_Observers-Single_file`
-
-### Perf - memory profiling
-
-Change kernel variable to enable Perf to collect information about the program's runtime characteristics as a user with `sudo` (without `root` account access)
-
-`sudo sh -c 'echo 1 > /proc/sys/kernel/perf_event_paranoid'`
-
-Debug
-
-`/usr/bin/perf record --freq=997 --call-graph dwarf -q -o /tmp/clion15732317547050053395perf ${PATH_TO_PROJECT}/cmake-build-debug/Observer-Push-Concrete_Subject_and_Observers-Single_file`
+Are you ready for more? Check out advanced stuff on branch `advanced_skeleton` coming soon!
 
 ## Sources
 
-- copied & pasted Q&A from OpenAI ChatGPT conversation `VS Code C++ Setup Arch`
-- https://duckduckgo.com/?t=ffab&q=vscode+cppdbg&ia=web
-- https://code.visualstudio.com/docs/cpp/launch-json-reference
-- https://duckduckgo.com/?t=ffab&q=vscode+c%2B%2B+cmake+debugging&ia=web
-- https://devblogs.microsoft.com/cppblog/introducing-cmake-debugger-in-vs-code-debug-your-cmake-scripts-using-open-source-cmake-debugger/
-- https://www.reddit.com/r/neovim/comments/17rhvtl/guide_how_to_use_clangd_cc_lsp_in_any_project/
-- https://clangd.llvm.org/installation.html
-- https://www.reddit.com/r/cpp/comments/gy08ip/which_ide_do_you_use_or_if_you_prefer_text/
-- https://duckduckgo.com/?q=clangd+vscode+c%2B%2B+cmake&t=ffab&ia=web
-- https://duckduckgo.com/?q=clangd+vscode+c%2B%2B+cmake&t=ffab&ia=web
-- https://stackoverflow.com/questions/51885784/how-to-setup-vs-code-for-c-with-clangd-support
-- https://github.com/Mizux/cmake-cpp
-- https://duckduckgo.com/?t=ffab&q=c%2Fc%2B%2B+extension+visual+studio+code+microsoft&ia=web
-- https://code.visualstudio.com/docs/languages/cpp
-- https://github.com/microsoft/vscode-cpptools
-- https://duckduckgo.com/?q=microsoft+c%2Fc%2B%2B+extension+not+available+vscode&t=ffab&df=m&ia=web
-- https://github.com/microsoft/vscode-cpptools/discussions/12840
-- https://code.visualstudio.com/docs/cpp/config-linux#_prerequisites
-- https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools
-- https://www.youtube.com/results?search_query=visual+studio+code+c%2B%2B+linux
-- https://www.youtube.com/watch?v=oQ9E_LFoo9U
-- https://github.com/marmottetranquille/Cpp-skeleton
-- https://duckduckgo.com/?t=ffab&q=vscode+cmake+c%2B%2B+skeleton&ia=web
-- 
-
-- CMake Debugger
-    - https://duckduckgo.com/?t=ffab&q=vscode+c%2B%2B+cmake+debugging&ia=web
-    - https://devblogs.microsoft.com/cppblog/introducing-cmake-debugger-in-vs-code-debug-your-cmake-scripts-using-open-source-cmake-debugger/
+See the [`sources` file](sources.md) .

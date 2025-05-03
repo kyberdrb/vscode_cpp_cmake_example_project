@@ -138,7 +138,7 @@ cmake --build . # Build the project from the generated build files which creates
 
 [Here](res/example_output-simple_windows_11.txt) is an example output from _Developer PowerShell for VS 2022_ on Windows 11 with Visual Studio 17.13.6 and Git 2.49.0 .
 
-Example output from _Developer PowerShell for VS 2022_ on Windows 11 with Visual Studio 17.13.6 and Git 2.49.0 is available [here](res/example_output-simple_windows_11.txt).
+Example output from _Developer PowerShell for VS 2022_ on Windows 11 with Visual Studio 2022 Community 17.13.6 and Git 2.49.0 is available [here](res/example_output-simple_windows_11.txt).
 
 ##### Incremental build
 
@@ -178,13 +178,21 @@ TODO build command
 
 ### Making Changes
 
-- Edit-Build-Run workflow - incremental build one-liners
+**Edit-Build-Run workflow**  
+After making changes to the project, build it incrementally by using the command in the _Incremental build_ chapters.
 
-- Simple debugging: F5, launch.json
+Command for running the compiled executable is listed in the build instructions for specific platforms as the last command.
+
+Consequent debugging sessions can be configured in _Run & Debug_ (`Ctrl + Shift + D`) extension pane on the left hand side. At the top of the pane, select the debugging session by your platform, i.e. operating system. In the `main.cpp` click on the line numbers you want to stop the program's execution and introspect the variable values. Then start the debugging session by clicking on the green triangle or by pressing `F5` .
+
+- Describe simple debugging:
+    - F5
+    - launch.json
 
 ## VSCode Project configuration
 
-settings.json
+- settings.json
+- .clangd
 
 ## Build Instructions - The Path of Ninja - Advanced Guide
 

@@ -12,7 +12,8 @@ add_executable(my_cpp_project
     src/main.cpp
 )
 
+# TODO add CMakePresets.json for multiplatform compatibility
 # TODO generate '.vscode/launch.json' for VSCode debugger extension
-# TODO generate '.clangd', but only if on Linux/explicitly defined
+# TODO generate '.clangd', but only if on Linux
 # TODO generate '.vscode/settings.json'
 # TODO integrate CPM dependency manager + integrate Google Test via CPM

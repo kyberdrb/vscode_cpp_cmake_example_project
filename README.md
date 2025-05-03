@@ -181,13 +181,9 @@ TODO build command
 **Edit-Build-Run workflow**  
 After making changes to the project, build it incrementally by using the command in the _Incremental build_ chapters.
 
-Command for running the compiled executable is listed in the build instructions for specific platforms as the last command.
+Command for running the compiled executable normally - without debugging - is listed in the build instructions for specific platforms as the last command.
 
-Consequent debugging sessions can be configured in _Run & Debug_ (`Ctrl + Shift + D`) extension pane on the left hand side. At the top of the pane, select the debugging session by your platform, i.e. operating system. In the `main.cpp` click on the line numbers you want to stop the program's execution and introspect the variable values. Then start the debugging session by clicking on the green triangle or by pressing `F5` .
-
-- Describe simple debugging:
-    - F5
-    - launch.json
+Debugging sessions can be configured and launched in _Run & Debug_ (`Ctrl + Shift + D`) extension pane on the left hand side. At the top of the pane, select the debugging session by your platform, i.e. operating system: these options are configured in `launch.json` . In the `main.cpp` click on the line numbers you want to stop the program's execution and introspect the variable values. Then start the debugging session by clicking on the green triangle or by pressing `F5` .
 
 ## VSCode Project configuration
 

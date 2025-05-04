@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "CMakeLists.txt": "cmake"
+    },
+    
+    "C_Cpp.intelliSenseEngine": "@VSCODE_MS_CPP_EXT_INTELLISENSE_STATE", // Disable IntelliSense from Microsoft C/C++ extension in favor of clangd, but only on non-Windows systems
+    
+    // Disable CMake in VSCode: using CMake via external terminal instead
+    "cmake.configureOnOpen": false,
+    "cmake.configureOnEdit": false,
+    "cmake.automaticReconfigure": false,
+
+    // TODO include this section only on non-Windows platforms & forward relative path to build dir from CMake - BEGIN
+    "clangd.arguments": [
+        "--compile-commands-dir=@BUILD_DIR_RELATIVE_PATH@" // Tell clangd to use compile_commands.json from build directory
+    ]
+    // TODO include this section only on non-Windows platforms - END
+}

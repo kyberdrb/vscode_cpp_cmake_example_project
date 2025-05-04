@@ -6,12 +6,13 @@
     
     "C_Cpp.intelliSenseEngine": "disabled", // Disable IntelliSense from Microsoft C/C++ extension in favor of clangd, but only on non-Windows systems
     
+    // Disable CMake in VSCode: using CMake via external terminal instead
+    "cmake.configureOnOpen": false,
+    "cmake.configureOnEdit": false,
+    "cmake.automaticReconfigure": false,
+
     // Only generate on Linux systems
     "clangd.arguments": [
         "--compile-commands-dir=build" // Tell clangd to use compile_commands.json from build directory
-    ],
-
-    "cmake.configureOnOpen": false,
-    "cmake.configureOnEdit": false,
-    "cmake.automaticReconfigure": false
+    ]
 }

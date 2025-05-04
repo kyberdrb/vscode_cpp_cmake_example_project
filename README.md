@@ -103,9 +103,9 @@ We're only going to build the Debug version of the project with default compiler
 
 Click on the operating system you want to build the project on, to jump to the platform specific instructions for building the project.
 
-- [Windows 11](#windows-11---build-instructions): MSVC toolchain
-- [Linux](#linux---build-instructions): GCC toolchain
-- [macOS](#macos---build-instructions): Apple LLVM / Apple Clang toolchain
+- [Windows 11](#windows-11---clone--build-instructions): MSVC toolchain
+- [Linux](#linux---clone--build-instructions): GCC toolchain
+- [macOS](#macos---clone--build-instructions): Apple LLVM / Apple Clang toolchain
 
 #### Windows 11 - clone & build instructions
 
@@ -113,7 +113,7 @@ Open _Developer PowerShell for VS 2022_
 
 ##### Full build
 
-You may copy&paste the commands line-by-line, or execute it all at once, inthe _Developer PowerShell for VS 2022_
+You may copy&paste the commands line-by-line, or execute it all at once, in the _Developer PowerShell for VS 2022_
 
 ```powershell
 cd "${HOME}"
@@ -148,21 +148,40 @@ After making changes to the project, we don't need to go through the entire proc
 cd "${HOME}\git\vscode_cpp_cmake_example_project\build\" ; cmake .. ; cmake --build . ; .\Debug\my_cpp_project.exe
 ```
 
-#### Linux - build instructions
+#### Linux - clone & build instructions
 
 Open _Terminal_
 
-```
-TODO build commands
+##### Full build
+
+```sh
+cd "${HOME}"
+mkdir git
+cd git
+git clone https://github.com/kyberdrb/vscode_cpp_cmake_example_project.git
+cd vscode_cpp_cmake_example_project
+
+mkdir build-Debug
+cd build-Debug
+
+rm --recursive --verbose build-Debug
+
+ls ..
+cmake ..
+
+ls
+cmake --build .
+
+./my_cpp_project
 ```
 
 ##### Incremental build
 
-```
-TODO build command
+```sh
+date && cd "${HOME}/git/vscode_cpp_cmake_example_project/build-Debug" && cmake .. && cmake --build . && ./my_cpp_project
 ```
 
-#### macOS - build instructions
+#### macOS - clone & build instructions
 
 Open _Terminal_
 

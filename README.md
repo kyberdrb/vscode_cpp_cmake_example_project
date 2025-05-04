@@ -123,7 +123,7 @@ git clone https://github.com/kyberdrb/vscode_cpp_cmake_example_project.git
 cd vscode_cpp_cmake_example_project
 
 # Error 'Cannot find path' is normal, when the directory doesn't exist. This command runs successfully when the directory will be present after building the project
-Remove-Item -Verbose -Recurse -Path build
+Remove-Item -Recurse -Verbose -Path build
 
 mkdir build # fails, if the directory already exists, which is also normal
 cd build

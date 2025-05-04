@@ -3,6 +3,7 @@
 #include <expected>
 #include <iostream>
 #include <print>
+#include <ranges>
 #include <source_location>
 #include <vector>
 
@@ -46,7 +47,7 @@ int main() {
 
     std::println("");
 
-    std::vector numbers{1, 2, 3};
+    std::vector numbers{1, 2, 3, 4};
 
     auto isElementFound = std::any_of(numbers.begin(), numbers.end(), 
         [](auto currentNumber){
@@ -66,13 +67,38 @@ int main() {
         std::chrono::day()
     );
 
-    std::println("{:%Y/%m/%d}", std::chrono::system_clock::now());
+    std::println("{:%Y/%m/%d}", std::chrono::system_clock::now()); // Can produce a red-squiggly underline reporting a false-positive ill-formed expression by '"C_Cpp.intelliSenseEngine": "default"' saying: "call to consteval function "std::basic_format_string<_CharT, _Args...>::basic_format_string(const _Ty &_Str_val) [with _CharT=char, _Args=<std::chrono::system_clock::time_point>, _Ty=char [12]]" did not produce a valid constant expressionC/C++(3133)"
+
+    // below are ways of using C++20 chrono calendar features that are properly recognized by '"C_Cpp.intelliSenseEngine": "default"'
+    std::string formatted_time = std::format("{:%Y/%m/%d}", std::chrono::system_clock::now());
+    std::cout << formatted_time << std::endl;
+    std::println("{}", formatted_time);
 
     auto currentTimepoint = std::chrono::system_clock::now();
-    // auto currentTime = std::chrono::steady_clock::now();
-    auto date = std::chrono::year_month_day{
-        std::chrono::floor<std::chrono::days>(currentTimepoint)
-    };
+    // auto currentTime = std::chrono::steady_clock::now(); // 'std::chrono::steady_clock' doesn't work for chrono C++20 calendar features
+    auto date = std::chrono::year_month_day{std::chrono::floor<std::chrono::days>(currentTimepoint)};
+    std::println("{:%Y/%m/%d}", date);
+
+    auto now = std::chrono::system_clock::now();
+    std::time_t time = std::chrono::system_clock::to_time_t(now);
+    std::tm* tm_data = std::localtime(&time); // Triggers warning under MSVC
+    std::cout << std::put_time(tm_data, "%Y/%m/%d") << std::endl;
+#ifdef _MSC_VER
+    std::println("{:%Y/%m/%d}", tm_data);
+#endif
+
+#ifdef _MSC_VER
+    auto now2 = std::chrono::system_clock::now();
+    std::time_t time2 = std::chrono::system_clock::to_time_t(now);
+    std::tm tm_data2;  // Create a struct, not a pointer
+    errno_t result2 = localtime_s(&tm_data2, &time2);  // Note the parameter order
+    if (result2 == 0) {
+        std::cout << std::put_time(&tm_data2, "%Y/%m/%d") << std::endl;
+        std::println("{:%Y/%m/%d}", tm_data2);
+    } else {
+        std::cerr << "Error converting time" << std::endl;
+    }
+#endif
 
     std::println(
         "{}/{:02}/{}", 
@@ -114,6 +140,10 @@ int main() {
 
     // Verified output
     std::println("Canadian Thanksgiving: {:%Y/%m/%d}", canadianThanksgiving);
+
+#ifdef _MSC_VER
+    std::println("{}{}", "Even numbers: ", numbers | std::views::filter([](auto number) {return number % 2 == 0;}));
+#endif
 
     std::println("EOF");
 

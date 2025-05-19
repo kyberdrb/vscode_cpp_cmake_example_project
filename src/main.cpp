@@ -147,6 +147,55 @@ int main() {
     std::println("{}{}", "Even numbers: ", numbers | std::views::filter([](auto number) {return number % 2 == 0;}));
 #endif
 
+    auto print_subrange = [](std::ranges::viewable_range auto&& r)
+    {
+        std::cout << '[';
+        for (char space[]{0,0}; auto elem : r)
+            std::cout << space << elem, *space = ' ';
+        std::cout << "] ";
+    };
+
+    const auto v = {1, 2, 3, 4, 5, 6};
+ 
+    std::cout << "All sliding windows of width:\n";
+    for (const unsigned width : std::views::iota(1U, 1U + v.size()))
+    {
+        auto const windows = v | std::views::slide(width);
+        std::cout << "W = " << width << ": ";
+        std::ranges::for_each(windows, print_subrange);
+        std::cout << '\n';
+    }
+
+    auto windowLength{3};
+    auto const windows = v | std::views::slide(windowLength);
+    std::print("{}", "W=3: ");
+    std::ranges::for_each(windows, print_subrange);
+    std::println();
+    auto firstWindow = *std::ranges::begin(windows);
+    std::println("{}", "first window: ");
+
+    for (const auto& element : firstWindow) {
+        std::println("{}", element);
+    }
+
+    std::ranges::for_each(firstWindow.cbegin(), firstWindow.cend(), [](auto&& element) {
+        std::println("{}", element);
+    });
+
+    std::println("{}{}", "first element of first window: ", *firstWindow.cbegin());
+    std::println("{}{}", "last element of first window: ", *std::prev(firstWindow.cend()));
+
+    std::println("{}", "---");
+    for (const auto& subrange : windows) {
+        for (const auto& subrangeElement : subrange) {
+            std::println("{}", subrangeElement);
+        }
+
+        std::println("{}{}", "first element in this subrange: ", *subrange.cbegin());
+        std::println("{}{}", "last element in this subrange: ", *std::prev(subrange.cend()));
+        std::println("{}", "---");
+    }
+
     std::println("EOF");
 
     return 0;

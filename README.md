@@ -136,7 +136,7 @@ cmake --build . # Build the project from the generated build files which creates
 ./Debug/my_cpp_project.exe # Run the project
 ```
 
-[Here](res/example_output-simple_windows_11.txt) is an example output from _Developer PowerShell for VS 2022_ on Windows 11 with Visual Studio 17.13.6 and Git 2.49.0 .
+[Here](res/example_output-windows_11-simple.txt) is an example output from _Developer PowerShell for VS 2022_ on Windows 11 with Visual Studio 17.13.6 and Git 2.49.0 .
 
 Example output from _Developer PowerShell for VS 2022_ on Windows 11 with Visual Studio 2022 Community 17.13.6 and Git 2.49.0 is available [here](res/example_output-simple_windows_11.txt).
 

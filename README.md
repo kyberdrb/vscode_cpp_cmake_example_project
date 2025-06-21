@@ -123,13 +123,13 @@ git clone https://github.com/kyberdrb/vscode_cpp_cmake_example_project.git
 cd vscode_cpp_cmake_example_project
 
 # Error 'Cannot find path' is normal, when the directory doesn't exist. This command runs successfully when the directory will be present after building the project
-Remove-Item -Recurse -Verbose -Path build
+Remove-Item -Recurse -Verbose -Path build/
 
 mkdir build # fails, if the directory already exists, which is also normal
 cd build
 
 ls .. # look at the files we're going to work with
-cmake .. #TODO not 'cmake -DCMAKE_BUILD_TYPE=Debug ..' # Generate build files via CMake from the directory containing CMakeLists.txt with the use of the default toolchain
+cmake .. # Specifying Debug version by 'cmake -DCMAKE_BUILD_TYPE=Debug ..' isn't necessary, as the Debug version is being built by default: Generate build files via CMake from the directory containing CMakeLists.txt with the use of the default toolchain
 
 ls # look at the files we're going to work with
 cmake --build . # Build the project from the generated build files which creates executable file
@@ -142,10 +142,14 @@ Example output from _Developer PowerShell for VS 2022_ on Windows 11 with Visual
 
 ##### Incremental build
 
-After making changes to the project, we don't need to go through the entire procedure. This one-liner command in the _Developer PowerShell for VS 2022_ is sufficient for the changes to be built into the executable.
+After making changes to the project, we don't need to go through the entire procedure. This **_one-liner_** command in the _Developer PowerShell for VS 2022_ is sufficient for the changes to be built into the executable.
 
 ```powershell
+# Build
 cd "${HOME}\git\vscode_cpp_cmake_example_project\build\" ; cmake .. ; cmake --build . ; .\Debug\my_cpp_project.exe
+
+# Rebuild i.e. clean & build
+cd "${HOME}\git\other\vscode_cpp_cmake_example_project\" ; Remove-Item -Recurse -Verbose -Path build/ ; Remove-Item -Recurse -Verbose -Path .vscode/ ; mkdir build/ ; cd build/ ; cmake .. ; cmake --build . ; .\Debug\my_cpp_project.exe
 ```
 
 #### Linux - clone & build instructions
@@ -177,8 +181,10 @@ cmake --build .
 
 ##### Incremental build
 
+**_One-liners:_**
+
 ```sh
-cd .. && rm -r build-Debug/ && mkdir build-Debug/ # optional: for rebuilds
+cd .. && rm --recursive .vscode/ && rm --recursive build-Debug/ && mkdir build-Debug/ # optional commands for rebuilds
 date && cd "${HOME}/git/vscode_cpp_cmake_example_project/build-Debug" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . && ./my_cpp_project
 ```
 

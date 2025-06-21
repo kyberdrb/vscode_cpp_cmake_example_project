@@ -54,14 +54,16 @@ set(BINARY_ABSOLUTE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}")
 set(LAUNCH_JSON_DEBUG_CONFIGURATIONS)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    message("Generate 'launch.json' debug compatible with MSVC for Windows")
-    set(LAUNCH_JSON_DEBUG_CONFIGURATIONS [=[{
-            "name": "Run debugging on Windows platforms with MSVC debugger - launch the binary", // DIFFERENT // TODO - format: "Start debugging session: '<PROJECT_NAME>-<PLATFORM_NAME>-<COMPILER_NAME>'"
-            "type": "cppvsdbg", // DIFFERENT
+    message("Generate 'launch.json' debug configuration for VSCode compatible with MSVC for Windows")
+    set(DEBUG_SESSION_NAME "Start debugging session on ${CMAKE_SYSTEM_NAME} for '${TARGET_NAME}' compiled by ${CMAKE_CXX_COMPILER_ID}")
+    set(TARGET_BINARY_PATH "${CMAKE_CURRENT_BINARY_DIR}/Debug/${TARGET_NAME}.exe")
+    set(LAUNCH_JSON_DEBUG_CONFIGURATIONS [=[
+"type": "cppvsdbg", // DIFFERENT
 
             "request": "launch", // SAME
 
-            "program": "${workspaceFolder}/build/Debug/my_cpp_project.exe", // DIFFERENT // TODO change format to absolute path
+            //"program": "${workspaceFolder}/build/Debug/my_cpp_project.exe", // DIFFERENT // Location of the compiled executable formatted as forward-slashed-Windows-style path
+            //"program": "${command:cmake.launchTargetPath}", // DIFFERENT // Resolves target executable path by 'CMake Tools' VSCode extension: slower debug session startup, more magical, but with better cross-compatibility
 
             "args": [], // SAME // enter the arguments for the program when needed: single letter arguments '-o file.txt' or '/o file.txt', keyword arguments '--file input_file.txt' or an arbitrary text 'someArgument' or '"multiple words as one argument"' in quotes
             "stopAtEntry": false, // SAME
@@ -73,7 +75,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    message("Generate 'launch.json' debug compatible with GCC (possibly Linux, might be macOS or a different platform)")
+    message("Generate 'launch.json' debug configuration for VSCode compatible with GCC (possibly Linux, might be macOS or a different platform)")
     set(DEBUG_SESSION_NAME "Start debugging session on ${CMAKE_SYSTEM_NAME} for '${TARGET_NAME}' compiled by ${CMAKE_CXX_COMPILER_ID}, // DIFFERENT")
     set(TARGET_BINARY_PATH "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}")
     set(LAUNCH_JSON_DEBUG_CONFIGURATIONS [=[
@@ -82,7 +84,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
             "request": "launch", // SAME
 
             //"program": "${workspaceFolder}/build-Debug/my_cpp_project",  // DIFFERENT // Location of the compiled executable formatted as UNIX-style path
-            //"program": "${command:cmake.launchTargetPath}", // DIFFERENT resolve target executable path by 'CMake Tools' VSCode extension: slower debug session startup, but with better cross-compatibility?
+            //"program": "${command:cmake.launchTargetPath}", // DIFFERENT // Resolves target executable path by 'CMake Tools' VSCode extension: slower debug session startup, more magical, but with better cross-compatibility
 
             "args": [],  // SAME // enter the arguments for the program when needed: single letter arguments '-o file.txt', keyword arguments '--file input_file.txt' or an arbitrary text 'someArgument' or '"multiple words as one argument"' in quotes
             "stopAtEntry": false, // SAME
@@ -103,7 +105,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    message("Generate 'launch.json' debug compatible with Clang or AppleClang (possibly macOS, might be Linux, Windows or a different platform)")
+    message("Generate 'launch.json' debug configuration for VSCode compatible with Clang or AppleClang (possibly macOS, might be Linux, Windows or a different platform)")
     set(LAUNCH_JSON_DEBUG_CONFIGURATIONS [=[{
             "version": "0.2.0",
             "configurations": [

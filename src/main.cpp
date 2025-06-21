@@ -79,17 +79,19 @@ int main() {
     auto date = std::chrono::year_month_day{std::chrono::floor<std::chrono::days>(currentTimepoint)};
     std::println("{:%Y/%m/%d}", date);
 
+#ifndef _MSC_VER
     auto now = std::chrono::system_clock::now();
     std::time_t time = std::chrono::system_clock::to_time_t(now);
-    std::tm* tm_data = std::localtime(&time); // Triggers warning under MSVC
+    std::tm* tm_data = std::localtime(&time); // Triggers warning under MSVC 19.44.35211.0: src\main.cpp(85,29): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
     std::cout << std::put_time(tm_data, "%Y/%m/%d") << std::endl;
     std::stringstream tm_data_as_sstream;
     tm_data_as_sstream << std::put_time(tm_data, "%Y/%m/%d");
     std::println("{}", tm_data_as_sstream.str());
+#endif
 
 #ifdef _MSC_VER
     auto now2 = std::chrono::system_clock::now();
-    std::time_t time2 = std::chrono::system_clock::to_time_t(now);
+    std::time_t time2 = std::chrono::system_clock::to_time_t(now2);
     std::tm tm_data2;  // Create a struct, not a pointer
     errno_t result2 = localtime_s(&tm_data2, &time2);  // Note the parameter order
     if (result2 == 0) {

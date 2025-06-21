@@ -12,6 +12,7 @@
 
     "C_Cpp.autoAddFileAssociations": false, // prevent updating "files.associations", as the entries might not be compatible with other platforms
 
+    // TODO merge these variables into single variable named e.g. `@UNIQUE_SETTINGS_JSON_CONFIGURATION@` for pretty formatting, i.e. no empty lines
     @VSCODE_MICROSOFT_CPP_EXTENSION_PLATFORM_SPECIFIC_INTELLISENSE_STATE@
     @CLANGD_CONFIGURATION@
 }

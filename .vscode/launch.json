@@ -1,43 +1,31 @@
-// TODO generate from CMake
 {
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run debugging on Linux platforms",
-            "type": "cppdbg", // "cppvsdbg" for Windows
-            "request": "launch",
-            "program": "${workspaceFolder}/build-Debug/my_cpp_project", // Location of the compiled executable formatted as UNIX-style path
-            "args": [], // enter the arguments for the program when needed: single letter arguments '-o file.txt', keyword arguments '--file input_file.txt' or an arbitrary text 'someArgument' or '"multiple words as one argument"' in quotes
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "miDebuggerPath": "/usr/bin/gdb", // Path to GDB
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ]
-        },
-        {
-            "name": "Run debugging on Windows platforms with MSVC debugger - launch the binary",
-            "type": "cppvsdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/Debug/my_cpp_project.exe",
-            "args": [], // enter the arguments for the program when needed: single letter arguments '-o file.txt' or '/o file.txt', keyword arguments '--file input_file.txt' or an arbitrary text 'someArgument' or '"multiple words as one argument"' in quotes
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "console": "internalConsole",
-        },
-        {
-            "name": "Run debugging on Windows platforms with MSVC debugger - attach to the running binary",
-            "type": "cppvsdbg",
-            "request": "attach",
-            "processId": "${command:pickProcess}"
+            "name": "Start debugging session on Linux for 'my_cpp_project' compiled by GNU, // DIFFERENT",
+            "program": "/home/laptop/git/kyberdrb/vscode_cpp_cmake_minimal_project/build-Debug/my_cpp_project", // DIFFERENT
+            "type": "cppdbg", // DIFFERENT
+
+            "request": "launch", // SAME
+
+            //"program": "${workspaceFolder}/build-Debug/my_cpp_project",  // DIFFERENT // Location of the compiled executable formatted as UNIX-style path
+            //"program": "${command:cmake.launchTargetPath}", // DIFFERENT resolve target executable path by 'CMake Tools' VSCode extension: slower debug session startup, but with better cross-compatibility?
+
+            "args": [],  // SAME // enter the arguments for the program when needed: single letter arguments '-o file.txt', keyword arguments '--file input_file.txt' or an arbitrary text 'someArgument' or '"multiple words as one argument"' in quotes
+            "stopAtEntry": false, // SAME
+            "cwd": "${workspaceFolder}", // SAME
+            "environment": [],  // SAME // modify PATH variable; add custom system variables
+
+            "externalConsole": false, // UNIQUE GCC
+            "MIMode": "gdb", // UNIQUE GCC
+            "miDebuggerPath": "/usr/bin/gdb", // UNIQUE GCC
+            "setupCommands": [ // UNIQUE GCC
+                { // UNIQUE GCC
+                    "description": "Enable pretty-printing for gdb", // UNIQUE GCC
+                    "text": "-enable-pretty-printing", // UNIQUE GCC
+                    "ignoreFailures": true // UNIQUE GCC
+                } // UNIQUE GCC
+            ] // UNIQUE GCC
         }
     ]
 }

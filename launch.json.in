@@ -1,0 +1,9 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "@DEBUG_SESSION_NAME@",
+            "program": "@TARGET_BINARY_PATH@", // DIFFERENT
+            @LAUNCH_JSON_DEBUG_CONFIGURATIONS@
+    ]
+}

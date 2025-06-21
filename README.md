@@ -129,7 +129,7 @@ mkdir build # fails, if the directory already exists, which is also normal
 cd build
 
 ls .. # look at the files we're going to work with
-cmake .. # Generate build files via CMake from the directory containing CMakeLists.txt with the use of the default toolchain
+cmake .. #TODO not 'cmake -DCMAKE_BUILD_TYPE=Debug ..' # Generate build files via CMake from the directory containing CMakeLists.txt with the use of the default toolchain
 
 ls # look at the files we're going to work with
 cmake --build . # Build the project from the generated build files which creates executable file
@@ -167,7 +167,7 @@ cd build-Debug
 rm --recursive --verbose build-Debug
 
 ls ..
-cmake ..
+cmake -DCMAKE_BUILD_TYPE=Debug .. // a little more complex than 'cmake ..' but the option '-DCMAKE_BUILD_TYPE=Debug' adds debug information into the executable, making it debuggable with 'F5' found under 'Run & Debug' (Ctrl + Shift + D) on the side menu
 
 ls
 cmake --build .
@@ -178,7 +178,8 @@ cmake --build .
 ##### Incremental build
 
 ```sh
-date && cd "${HOME}/git/vscode_cpp_cmake_example_project/build-Debug" && cmake .. && cmake --build . && ./my_cpp_project
+cd .. && rm -r build-Debug/ && mkdir build-Debug/ # optional: for rebuilds
+date && cd "${HOME}/git/vscode_cpp_cmake_example_project/build-Debug" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . && ./my_cpp_project
 ```
 
 #### macOS - clone & build instructions

@@ -123,16 +123,17 @@ git clone https://github.com/kyberdrb/vscode_cpp_cmake_example_project.git
 cd vscode_cpp_cmake_example_project
 
 # Error 'Cannot find path' is normal, when the directory doesn't exist. This command runs successfully when the directory will be present after building the project
+Remove-Item -Recurse -Verbose -Path .vscode/
 Remove-Item -Recurse -Verbose -Path build/
 
-mkdir build # fails, if the directory already exists, which is also normal
-cd build
+mkdir build/ # fails, if the directory already exists, which is also normal
+cd build/
 
 ls .. # look at the files we're going to work with
 cmake .. # Specifying Debug version by 'cmake -DCMAKE_BUILD_TYPE=Debug ..' isn't necessary, as the Debug version is being built by default: Generate build files via CMake from the directory containing CMakeLists.txt with the use of the default toolchain
 
 ls # look at the files we're going to work with
-cmake --build . # Build the project from the generated build files which creates executable file
+cmake --build . # Build the project - in Debug version by default - from the generated build files which creates executable file
 ./Debug/my_cpp_project.exe # Run the project
 ```
 
@@ -149,7 +150,7 @@ After making changes to the project, we don't need to go through the entire proc
 cd "${HOME}\git\vscode_cpp_cmake_example_project\build\" ; cmake .. ; cmake --build . ; .\Debug\my_cpp_project.exe
 
 # Rebuild i.e. clean & build
-cd "${HOME}\git\other\vscode_cpp_cmake_example_project\" ; Remove-Item -Recurse -Verbose -Path build/ ; Remove-Item -Recurse -Verbose -Path .vscode/ ; mkdir build/ ; cd build/ ; cmake .. ; cmake --build . ; .\Debug\my_cpp_project.exe
+cd "${HOME}\git\other\vscode_cpp_cmake_example_project\" ; Remove-Item -Recurse -Verbose -Path .vscode/ ; Remove-Item -Recurse -Verbose -Path build/ ; mkdir build/ ; cd build/ ; cmake .. ; cmake --build . ; .\Debug\my_cpp_project.exe
 ```
 
 #### Linux - clone & build instructions
@@ -165,10 +166,11 @@ cd git
 git clone https://github.com/kyberdrb/vscode_cpp_cmake_example_project.git
 cd vscode_cpp_cmake_example_project
 
+rm --recursive --verbose .vscode/
+rm --recursive --verbose build-Debug/
+
 mkdir build-Debug
 cd build-Debug
-
-rm --recursive --verbose build-Debug
 
 ls ..
 cmake -DCMAKE_BUILD_TYPE=Debug .. // a little more complex than 'cmake ..' but the option '-DCMAKE_BUILD_TYPE=Debug' adds debug information into the executable, making it debuggable with 'F5' found under 'Run & Debug' (Ctrl + Shift + D) on the side menu
@@ -184,8 +186,11 @@ cmake --build .
 **_One-liners:_**
 
 ```sh
-cd .. && rm --recursive .vscode/ && rm --recursive build-Debug/ && mkdir build-Debug/ # optional commands for rebuilds
+# Build
 date && cd "${HOME}/git/vscode_cpp_cmake_example_project/build-Debug" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . && ./my_cpp_project
+
+# Rebuild i.e. clean & build
+date && cd "${HOME}/git/kyberdrb/vscode_cpp_cmake_minimal_project/" && rm --recursive --verbose .vscode/ && rm --recursive --verbose build-Debug/ && mkdir build-Debug/ && cd "build-Debug/" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . && ./my_cpp_project
 ```
 
 #### macOS - clone & build instructions

@@ -3,7 +3,18 @@
     "configurations": [
         {
             "name": "@DEBUG_SESSION_NAME@", // DIFFERENT
-            "program": "@TARGET_BINARY_PATH@", // DIFFERENT
-            @LAUNCH_JSON_DEBUG_CONFIGURATIONS@
+            "type": "@VSCODE_DEBUGGER_TYPE@", // DIFFERENT
+            "request": "launch", // SAME
+
+            "program": "@TARGET_BINARY_PATH@", // SAME IN TEMPLATE, DIFFERENT IN GENERATED FILE LAUNCH.JSON // Resolves target executable path by 'CMake' itself: faster debug session startup, more transparent, cross-compatibility with single-config and multi-config makefile generators attained so far
+            //"program": "${command:cmake.launchTargetPath}", // SAME // Resolves target executable path by 'CMake Tools' VSCode extension: slower debug session startup, more magical, but with better cross-compatibility
+
+            "args": [],  // SAME // enter the arguments for the program when needed: single letter arguments '-o file.txt', keyword arguments '--file input_file.txt' or an arbitrary text 'someArgument' or '"multiple words as one argument"' in quotes
+            "stopAtEntry": false, // SAME
+            "cwd": "${workspaceFolder}", // SAME
+            "environment": [],  // SAME // modify PATH variable; add custom system variables
+
+            @VSCODE_UNIQUE_DEBUG_CONFIGURATIONS@
+        }
     ]
 }

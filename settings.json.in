@@ -1,8 +1,14 @@
 {
     "editor.renderWhitespace": "all",
 
+    // Uncomment, when whitespaces aren't displayed on lines regular text (only on by the cursor marked/higlighted text)
+    //"workbench.colorCustomizations": {
+    //    "editorWhitespace.foreground": "#BFBFBF"
+    //}
+
     "files.associations": {
-        "CMakeLists.txt": "cmake"
+        "CMakeLists.txt": "cmake",
+        "launch.json": "jsonc"
     },
 
     // Disable CMake in VSCode: using CMake via external terminal instead

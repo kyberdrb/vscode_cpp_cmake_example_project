@@ -50,63 +50,43 @@ get_target_property(TARGET_NAME my_cpp_project NAME)
 message("Implicit name of binary: ${TARGET_NAME}")
 
 set(BINARY_ABSOLUTE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}")
+set(VSCODE_DEBUGGER_TYPE "cppdbg")
 
-set(LAUNCH_JSON_DEBUG_CONFIGURATIONS)
+set(VSCODE_UNIQUE_DEBUG_CONFIGURATIONS)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     message("Generate 'launch.json' debug configuration for VSCode compatible with MSVC for Windows")
     set(DEBUG_SESSION_NAME "Start debugging session on ${CMAKE_SYSTEM_NAME} for '${TARGET_NAME}' compiled by ${CMAKE_CXX_COMPILER_ID}")
+    set(VSCODE_DEBUGGER_TYPE "cppvsdbg")
     set(TARGET_BINARY_PATH "${CMAKE_CURRENT_BINARY_DIR}/Debug/${TARGET_NAME}.exe")
-    set(LAUNCH_JSON_DEBUG_CONFIGURATIONS [=[
-"type": "cppvsdbg", // DIFFERENT
-
-            "request": "launch", // SAME
-
-            //"program": "${workspaceFolder}/build/Debug/my_cpp_project.exe", // DIFFERENT // Location of the compiled executable formatted as forward-slashed-Windows-style path
-            //"program": "${command:cmake.launchTargetPath}", // DIFFERENT // Resolves target executable path by 'CMake Tools' VSCode extension: slower debug session startup, more magical, but with better cross-compatibility
-
-            "args": [], // SAME // enter the arguments for the program when needed: single letter arguments '-o file.txt' or '/o file.txt', keyword arguments '--file input_file.txt' or an arbitrary text 'someArgument' or '"multiple words as one argument"' in quotes
-            "stopAtEntry": false, // SAME
-            "cwd": "${workspaceFolder}", // SAME
-            "environment": [], // SAME
-
-            "console": "internalConsole" // UNIQUE MSVC
-        }]=])
+    set(VSCODE_UNIQUE_DEBUG_CONFIGURATIONS [=[
+"console": "internalConsole" // UNIQUE MSVC]=])
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     message("Generate 'launch.json' debug configuration for VSCode compatible with GCC (possibly Linux, might be macOS or a different platform)")
     set(DEBUG_SESSION_NAME "Start debugging session on ${CMAKE_SYSTEM_NAME} for '${TARGET_NAME}' compiled by ${CMAKE_CXX_COMPILER_ID}, // DIFFERENT")
     set(TARGET_BINARY_PATH "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}")
-    set(LAUNCH_JSON_DEBUG_CONFIGURATIONS [=[
-"type": "cppdbg", // DIFFERENT
 
-            "request": "launch", // SAME
+    find_program(GDB_PATH gdb REQUIRED)
+    message("Found GDB at: ${GDB_PATH}")
 
-            //"program": "${workspaceFolder}/build-Debug/my_cpp_project",  // DIFFERENT // Location of the compiled executable formatted as UNIX-style path
-            //"program": "${command:cmake.launchTargetPath}", // DIFFERENT // Resolves target executable path by 'CMake Tools' VSCode extension: slower debug session startup, more magical, but with better cross-compatibility
-
-            "args": [],  // SAME // enter the arguments for the program when needed: single letter arguments '-o file.txt', keyword arguments '--file input_file.txt' or an arbitrary text 'someArgument' or '"multiple words as one argument"' in quotes
-            "stopAtEntry": false, // SAME
-            "cwd": "${workspaceFolder}", // SAME
-            "environment": [],  // SAME // modify PATH variable; add custom system variables
-
-            "externalConsole": false, // UNIQUE GCC
-            "MIMode": "gdb", // UNIQUE GCC
-            "miDebuggerPath": "/usr/bin/gdb", // UNIQUE GCC
-            "setupCommands": [ // UNIQUE GCC
+    set(VSCODE_UNIQUE_DEBUG_CONFIGURATIONS
+"\"externalConsole\": false, // UNIQUE GCC
+            \"MIMode\": \"gdb\", // UNIQUE GCC
+            \"miDebuggerPath\": \"${GDB_PATH}\", // UNIQUE GCC
+            \"setupCommands\": [ // UNIQUE GCC
                 { // UNIQUE GCC
-                    "description": "Enable pretty-printing for gdb", // UNIQUE GCC
-                    "text": "-enable-pretty-printing", // UNIQUE GCC
-                    "ignoreFailures": true // UNIQUE GCC
+                    \"description\": \"Enable pretty-printing of variables and containers for gdb\", // UNIQUE GCC
+                    \"text\": \"-enable-pretty-printing\", // UNIQUE GCC
+                    \"ignoreFailures\": true // UNIQUE GCC
                 } // UNIQUE GCC
-            ] // UNIQUE GCC
-        }]=])
+            ] // UNIQUE GCC")
 endif()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message("Generate 'launch.json' debug configuration for VSCode compatible with Clang or AppleClang (possibly macOS, might be Linux, Windows or a different platform)")
-    set(LAUNCH_JSON_DEBUG_CONFIGURATIONS [=[{
+    set(VSCODE_UNIQUE_DEBUG_CONFIGURATIONS [=[{
             "version": "0.2.0",
             "configurations": [
                 {

@@ -11,6 +11,7 @@ add_executable(my_cpp_project
     src/main.cpp
 )
 
+message("Generate 'settings.json' debug configuration for VSCode compatible with ${CMAKE_SYSTEM_NAME} platform")
 set(VSCODE_MICROSOFT_CPP_EXTENSION_PLATFORM_SPECIFIC_INTELLISENSE_STATE 
     "\"C_Cpp.intelliSenseEngine\": \"disabled\"") # Disable IntelliSense from Microsoft C/C++ extension in favor of clangd, but only on non-Windows systems
 
@@ -33,87 +34,45 @@ endif()
 
 configure_file(settings.json.in ${CMAKE_SOURCE_DIR}/.vscode/settings.json @ONLY)
 
-# TODO generate '.vscode/launch.json' for VSCode debugger extension
-#   Linux: GDB, clang (LLVM/LLDB)
-#   Windows: MSVC, clang (LLVM/LLDB), clang (LLVM/LLDB - MSVC compatible API), MinGW
-#   macOS: clang (LLVM/LLDB), Apple clang (LLVM/LLDB - Apple), gdb
-
-message("Platform name: ${CMAKE_SYSTEM_NAME}")
-message("Compiler name: ${CMAKE_CXX_COMPILER_ID}")
-message("Build type=" ${CMAKE_BUILD_TYPE}) # TODO make more robust for multi-configuration makefile generators like 'MS Visual Studio' generator
-message("Build directory: ${CMAKE_BINARY_DIR}")
-message("Source directory: ${CMAKE_SOURCE_DIR}")
-message("Current binary directory: ${CMAKE_CURRENT_BINARY_DIR}")
-get_target_property(OUTPUT_NAME my_cpp_project OUTPUT_NAME)
-message("Explicit name of binary: ${OUTPUT_NAME}")
-get_target_property(TARGET_NAME my_cpp_project NAME)
-message("Implicit name of binary: ${TARGET_NAME}")
-
-set(BINARY_ABSOLUTE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}")
+message("Generate 'launch.json' debug configuration for VSCode compatible with ${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}")
+set(DEBUG_SESSION_NAME "Start debugging session on ${CMAKE_SYSTEM_NAME} for '${TARGET_NAME}' compiled by ${CMAKE_CXX_COMPILER_ID}")
 set(VSCODE_DEBUGGER_TYPE "cppdbg")
 
-set(VSCODE_UNIQUE_DEBUG_CONFIGURATIONS)
-
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    message("Generate 'launch.json' debug configuration for VSCode compatible with MSVC for Windows")
-    set(DEBUG_SESSION_NAME "Start debugging session on ${CMAKE_SYSTEM_NAME} for '${TARGET_NAME}' compiled by ${CMAKE_CXX_COMPILER_ID}")
     set(VSCODE_DEBUGGER_TYPE "cppvsdbg")
     set(TARGET_BINARY_PATH "${CMAKE_CURRENT_BINARY_DIR}/Debug/${TARGET_NAME}.exe")
     set(VSCODE_UNIQUE_DEBUG_CONFIGURATIONS [=[
-"console": "internalConsole" // UNIQUE MSVC]=])
+"console": "internalConsole"]=])
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    message("Generate 'launch.json' debug configuration for VSCode compatible with GCC (possibly Linux, might be macOS or a different platform)")
-    set(DEBUG_SESSION_NAME "Start debugging session on ${CMAKE_SYSTEM_NAME} for '${TARGET_NAME}' compiled by ${CMAKE_CXX_COMPILER_ID}, // DIFFERENT")
+#if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(TARGET_BINARY_PATH "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}")
 
     find_program(GDB_PATH gdb REQUIRED)
     message("Found GDB at: ${GDB_PATH}")
 
     set(VSCODE_UNIQUE_DEBUG_CONFIGURATIONS
-"\"externalConsole\": false, // UNIQUE GCC
-            \"MIMode\": \"gdb\", // UNIQUE GCC
-            \"miDebuggerPath\": \"${GDB_PATH}\", // UNIQUE GCC
-            \"setupCommands\": [ // UNIQUE GCC
-                { // UNIQUE GCC
-                    \"description\": \"Enable pretty-printing of variables and containers for gdb\", // UNIQUE GCC
-                    \"text\": \"-enable-pretty-printing\", // UNIQUE GCC
-                    \"ignoreFailures\": true // UNIQUE GCC
-                } // UNIQUE GCC
-            ] // UNIQUE GCC")
+"\"externalConsole\": false,
+            \"MIMode\": \"gdb\",
+            \"miDebuggerPath\": \"${GDB_PATH}\",
+            \"setupCommands\": [
+                {
+                    \"description\": \"Enable pretty-printing of variables and containers for gdb\",
+                    \"text\": \"-enable-pretty-printing\",
+                    \"ignoreFailures\": true
+                }
+            ]")
 endif()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    message("Generate 'launch.json' debug configuration for VSCode compatible with Clang or AppleClang (possibly macOS, might be Linux, Windows or a different platform)")
-    set(VSCODE_UNIQUE_DEBUG_CONFIGURATIONS [=[{
-            "version": "0.2.0",
-            "configurations": [
-                {
-                    "name": "C/C++: LLDB Debug", // DIFFERENT
-                    "type": "cppdbg", // DIFFERENT
-
-                    "request": "launch",
-
-                    "program": "${workspaceFolder}/build/my_project", // DIFFERENT
-
-                    "args": [],
-                    "stopAtEntry": false,
-                    "cwd": "${workspaceFolder}",
-                    "environment": [],
-
-                    "externalConsole": false, // UNIQUE CLANG
-                    "MIMode": "lldb" // UNIQUE CLANG
-                }
-            ]
-        }]=])
+#if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    set(VSCODE_UNIQUE_DEBUG_CONFIGURATIONS [=[
+"externalConsole": false,
+            "MIMode": "lldb"]=])
 endif()
 
 configure_file(launch.json.in ${CMAKE_SOURCE_DIR}/.vscode/launch.json @ONLY)
-
-add_custom_command(TARGET my_cpp_project POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "Binary path: $<TARGET_FILE:my_cpp_project>"
-)
 
 # TODO generate '.clangd', but only if on Linux
 # TODO add CMakePresets.json for multiplatform compatibility

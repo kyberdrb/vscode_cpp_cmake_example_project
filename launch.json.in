@@ -16,7 +16,7 @@
             "cwd": "${workspaceFolder}",
             "environment": [], // provide custom system environment without modifying the underlying system - encapsulate project specific system setting inside the project itself: add custom system variables; modify PATH variable or other system environment variables
 
-            @VSCODE_UNIQUE_DEBUG_CONFIGURATIONS@
+            @VSCODE_PLATFORM_AND_COMPILER_SPECIFIC_DEBUG_CONFIGURATIONS@
         }
     ]
 }

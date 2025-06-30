@@ -38,43 +38,43 @@ message("Generate 'launch.json' debug configuration for VSCode compatible with $
 set(DEBUG_SESSION_NAME "Start debugging session on ${CMAKE_SYSTEM_NAME} for '${TARGET_NAME}' compiled by ${CMAKE_CXX_COMPILER_ID}")
 set(VSCODE_DEBUGGER_TYPE "cppdbg")
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows" AND CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(VSCODE_DEBUGGER_TYPE "cppvsdbg")
     set(TARGET_BINARY_PATH "${CMAKE_CURRENT_BINARY_DIR}/Debug/${TARGET_NAME}.exe")
-    set(VSCODE_UNIQUE_DEBUG_CONFIGURATIONS [=[
+    set(VSCODE_PLATFORM_AND_COMPILER_SPECIFIC_DEBUG_CONFIGURATIONS [=[
 "console": "internalConsole"]=])
 endif()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-#if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(TARGET_BINARY_PATH "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}")
 
     find_program(GDB_PATH gdb REQUIRED)
     message("Found GDB at: ${GDB_PATH}")
 
-    set(VSCODE_UNIQUE_DEBUG_CONFIGURATIONS
-"\"externalConsole\": false,
-            \"MIMode\": \"gdb\",
-            \"miDebuggerPath\": \"${GDB_PATH}\",
-            \"setupCommands\": [
+    set(VSCODE_PLATFORM_AND_COMPILER_SPECIFIC_DEBUG_CONFIGURATIONS [=[
+"externalConsole": false,
+            "MIMode": "gdb",
+]=])
+    string(APPEND VSCODE_PLATFORM_AND_COMPILER_SPECIFIC_DEBUG_CONFIGURATIONS
+"            \"miDebuggerPath\": \"${GDB_PATH}\",\n")
+    string(APPEND VSCODE_PLATFORM_AND_COMPILER_SPECIFIC_DEBUG_CONFIGURATIONS [=[
+            "setupCommands": [
                 {
-                    \"description\": \"Enable pretty-printing of variables and containers for gdb\",
-                    \"text\": \"-enable-pretty-printing\",
-                    \"ignoreFailures\": true
+                    "description": "Enable pretty-printing of variables and containers for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
                 }
-            ]")
+            ]
+    ]=])
 endif()
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-#if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    set(VSCODE_UNIQUE_DEBUG_CONFIGURATIONS [=[
+if (CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+    set(VSCODE_PLATFORM_AND_COMPILER_SPECIFIC_DEBUG_CONFIGURATIONS [=[
 "externalConsole": false,
             "MIMode": "lldb"]=])
 endif()
 
 configure_file(launch.json.in ${CMAKE_SOURCE_DIR}/.vscode/launch.json @ONLY)
 
-# TODO generate '.clangd', but only if on Linux
-# TODO add CMakePresets.json for multiplatform compatibility
-# TODO integrate CPM dependency manager + integrate Google Test via CPM
+# TODO generate '.clangd', but only if on Linux & GNU/GCC
 # TODO test on macOS and FreeBSD

@@ -150,7 +150,7 @@ After making changes to the project, we don't need to go through the entire proc
 cd "${HOME}\git\vscode_cpp_cmake_example_project\build\" ; cmake .. ; cmake --build . ; .\Debug\my_cpp_project.exe
 
 # Rebuild i.e. clean & build
-cd "${HOME}\git\other\vscode_cpp_cmake_example_project\" ; Remove-Item -Recurse -Verbose -Path .vscode/ ; Remove-Item -Recurse -Verbose -Path build/ ; mkdir build/ ; cd build/ ; cmake .. ; cmake --build . ; .\Debug\my_cpp_project.exe
+cd "${HOME}\git\vscode_cpp_cmake_example_project\" ; Remove-Item -Recurse -Verbose -Path .vscode/ ; Remove-Item -Recurse -Verbose -Path build/ ; mkdir build/ ; cd build/ ; cmake .. ; cmake --build . ; .\Debug\my_cpp_project.exe
 ```
 
 #### Linux - clone & build instructions
@@ -173,7 +173,7 @@ mkdir build-Debug
 cd build-Debug
 
 ls ..
-cmake -DCMAKE_BUILD_TYPE=Debug .. // a little more complex than 'cmake ..' but the option '-DCMAKE_BUILD_TYPE=Debug' adds debug information into the executable, making it debuggable with 'F5' found under 'Run & Debug' (Ctrl + Shift + D) on the side menu
+cmake -DCMAKE_BUILD_TYPE=Debug .. # a little more complex than 'cmake ..' but the option '-DCMAKE_BUILD_TYPE=Debug' adds debug information into the executable, making it debuggable with 'F5' found under 'Run & Debug' (Ctrl + Shift + D) on the side menu
 
 ls
 cmake --build .

@@ -1,12 +1,15 @@
 # VSCode CMake C++ project template
 
-Why? Because my CLion license expired.  
+Why?  
+Because my CLion license expired.  
+And because I want to make C++ development make accessible for more people.  
+Because C++ is awesome!*
 
 This is an introductory project to the realm of cross-platform, desktop, open-source C++ development.
 
 Tested on:
 
-- Arch Linux with GCC 14.2.1
+- Arch Linux with GCC 14.2.1 and 15.1.1
 - Windows 11 with MSVC 19.43.34810
 
 ## The Path of Least Resistance - Simplified Guide
@@ -73,6 +76,12 @@ All these packages might be contained in one metapackage `build-essentials` , th
 Install following tools
 
 - [Xcode](https://apps.apple.com/us/app/xcode/id497799835?mt=12/) - provides Apple Clang compiler, _Xcode_ makefile generator and Xcode Command Line Tools
+    - Xcode Command Line Tools Requires macOS debugging requires `LLDB.framework`, which can be obtained by installing:
+
+        ```sh
+        xcode-select --install
+        ```
+
 - [CMake](https://github.com/Kitware/CMake/releases/download/v4.0.1/cmake-4.0.1-macos10.10-universal.dmg) - provides CMake build system utilities
 
 ### VSCode Extensions

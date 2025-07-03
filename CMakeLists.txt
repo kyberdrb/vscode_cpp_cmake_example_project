@@ -34,7 +34,7 @@ endif()
 
 configure_file(settings.json.in ${CMAKE_SOURCE_DIR}/.vscode/settings.json @ONLY)
 
-message("Generate 'launch.json' debug configuration for VSCode compatible with ${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}")
+message("Generate 'launch.json' with debug configuration for VSCode, compatible with '${CMAKE_SYSTEM_NAME}' platform and '${CMAKE_CXX_COMPILER_ID}' compiler (assuming that this is the default toolchain for the platform)")
 set(DEBUG_SESSION_NAME "Start debugging session on ${CMAKE_SYSTEM_NAME} for '${TARGET_NAME}' compiled by ${CMAKE_CXX_COMPILER_ID}")
 set(VSCODE_DEBUGGER_TYPE "cppdbg")
 
@@ -43,14 +43,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows" AND CMAKE_CXX_COMPILER_ID STREQUAL "MSV
     set(TARGET_BINARY_PATH "${CMAKE_CURRENT_BINARY_DIR}/Debug/${TARGET_NAME}.exe")
     set(VSCODE_PLATFORM_AND_COMPILER_SPECIFIC_DEBUG_CONFIGURATIONS [=[
 "console": "internalConsole"]=])
-endif()
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(TARGET_BINARY_PATH "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}")
-
     find_program(GDB_PATH gdb REQUIRED)
-    message("Found GDB at: ${GDB_PATH}")
-
     set(VSCODE_PLATFORM_AND_COMPILER_SPECIFIC_DEBUG_CONFIGURATIONS [=[
 "externalConsole": false,
             "MIMode": "gdb",
@@ -66,12 +62,15 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
                 }
             ]
     ]=])
-endif()
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     set(VSCODE_PLATFORM_AND_COMPILER_SPECIFIC_DEBUG_CONFIGURATIONS [=[
 "externalConsole": false,
             "MIMode": "lldb"]=])
+
+else()
+    message(ERROR "Unsupported compiler-platform combination: can't generate 'launch.json' debug configuration with ${CMAKE_CXX_COMPILER_ID} compiler on ${CMAKE_SYSTEM_NAME}. Not a platform's default toolchain?")
+    return()
 endif()
 
 configure_file(launch.json.in ${CMAKE_SOURCE_DIR}/.vscode/launch.json @ONLY)

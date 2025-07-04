@@ -36,18 +36,17 @@ endif()
 configure_file(settings.json.in ${CMAKE_SOURCE_DIR}/.vscode/settings.json @ONLY)
 
 message("Generate 'launch.json' with debug configuration for VSCode, compatible with '${CMAKE_SYSTEM_NAME}' platform and '${CMAKE_CXX_COMPILER_ID}' compiler (assuming that this is the default toolchain for the platform)")
-set(DEBUG_SESSION_NAME "Start debugging session on ${CMAKE_SYSTEM_NAME} for '${TARGET_NAME}' compiled by ${CMAKE_CXX_COMPILER_ID}")
+set(DEBUG_SESSION_NAME "Start debugging session on ${CMAKE_SYSTEM_NAME} for '${EXECUTABLE_NAME}' compiled by ${CMAKE_CXX_COMPILER_ID}")
 set(VSCODE_DEBUGGER_TYPE "cppdbg")
+set(TARGET_BINARY_PATH "${CMAKE_CURRENT_BINARY_DIR}/${EXECUTABLE_NAME}")
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows" AND CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set(DEBUG_SESSION_NAME "Start debugging session on ${CMAKE_SYSTEM_NAME} for '${EXECUTABLE_NAME}' compiled by ${CMAKE_CXX_COMPILER_ID}")
     set(VSCODE_DEBUGGER_TYPE "cppvsdbg")
     set(TARGET_BINARY_PATH "${CMAKE_CURRENT_BINARY_DIR}/Debug/${EXECUTABLE_NAME}.exe")
     set(VSCODE_PLATFORM_AND_COMPILER_SPECIFIC_DEBUG_CONFIGURATIONS [=[
 "console": "internalConsole"]=])
 
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(TARGET_BINARY_PATH "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}")
     find_program(GDB_PATH gdb REQUIRED)
     set(VSCODE_PLATFORM_AND_COMPILER_SPECIFIC_DEBUG_CONFIGURATIONS [=[
 "externalConsole": false,
@@ -62,8 +61,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID STREQUAL "G
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 }
-            ]
-    ]=])
+            ]]=])
 
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     set(VSCODE_PLATFORM_AND_COMPILER_SPECIFIC_DEBUG_CONFIGURATIONS [=[

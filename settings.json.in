@@ -4,7 +4,7 @@
 
     "files.associations": {
         "CMakeLists.txt": "cmake",
-        "launch.json": "jsonc"
+        "launch.json": "jsonc" // Suppress errors due to comments present in the json file
     },
 
     // Disable VSCode CMake extension's autoconfigure and autogenerate: using CMake via external terminal instead
@@ -13,9 +13,7 @@
     "cmake.automaticReconfigure": false, // Disables automatic reconfiguration when CMake detects changes in the environment or configuration.
     "cmake.autoSelectActiveFolder": false, // Prevents VSCode from automatically selecting a folder as the active CMake project.
 
-    "C_Cpp.autoAddFileAssociations": false, // prevent updating "files.associations", as the entries might not be compatible with other platforms
+    "C_Cpp.autoAddFileAssociations": false, // prevent updating "files.associations" section in 'settings.json' (which happened on Windows), as the entries might not be compatible with other platforms (like Linux, which doesn't have to have some of the libs); see https://stackoverflow.com/a/70557916
 
-    // TODO merge these variables into single variable named e.g. `@UNIQUE_SETTINGS_JSON_CONFIGURATION@` for pretty formatting, i.e. no empty lines
-    @VSCODE_MICROSOFT_CPP_EXTENSION_PLATFORM_SPECIFIC_INTELLISENSE_STATE@
-    @CLANGD_CONFIGURATION@
+    @VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS@
 }

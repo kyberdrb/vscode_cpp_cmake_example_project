@@ -1,10 +1,6 @@
 {
+    // If whitespacecs aren't rendered, save [Ctrl+S] the settings.json file again
     "editor.renderWhitespace": "all",
-
-    // Uncomment, when whitespaces aren't displayed on lines regular text (only on by the cursor marked/higlighted text)
-    //"workbench.colorCustomizations": {
-    //    "editorWhitespace.foreground": "#BFBFBF"
-    //}
 
     "files.associations": {
         "CMakeLists.txt": "cmake",

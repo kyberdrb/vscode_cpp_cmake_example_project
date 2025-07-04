@@ -139,10 +139,10 @@ mkdir build/ # fails, if the directory already exists, which is also normal
 cd build/
 
 ls .. # look at the files we're going to work with
-cmake .. # Specifying Debug version by 'cmake -DCMAKE_BUILD_TYPE=Debug ..' isn't necessary, as the Debug version is being built by default: Generate build files via CMake from the directory containing CMakeLists.txt with the use of the default toolchain
+cmake .. # Specifying Debug version by 'cmake -DCMAKE_BUILD_TYPE=Debug ..' is ignored as VS2022 is a multi-config generator, that generates the desired executable variant in CMake build command, not in CMake generate command [which is what single-config generators are using]
 
 ls # look at the files we're going to work with
-cmake --build . # Build the project - in Debug version by default - from the generated build files which creates executable file
+cmake --build . --config Debug # Build the Debug version of the project's binary: the command 'cmake --build .' builds the Debug version by default, but by making the build type explicit, it also makes the understanding easier. For multi-config makefile generators like VS2022 - the default one in Windows 11 - is the build command a place for specifying executable variant, e.g. Debug, Release, etc.
 ./Debug/my_cpp_project.exe # Run the project
 ```
 
@@ -156,10 +156,10 @@ After making changes to the project, we don't need to go through the entire proc
 
 ```powershell
 # Build
-cd "${HOME}\git\vscode_cpp_cmake_example_project\build\" ; cmake .. ; cmake --build . ; .\Debug\my_cpp_project.exe
+cd "${HOME}\git\vscode_cpp_cmake_example_project\build\" ; cmake .. ; cmake --build . --config Debug; .\Debug\my_cpp_project.exe
 
 # Rebuild i.e. clean & build
-cd "${HOME}\git\vscode_cpp_cmake_example_project\" ; Remove-Item -Recurse -Verbose -Path .vscode/ ; Remove-Item -Recurse -Verbose -Path build/ ; mkdir build/ ; cd build/ ; cmake .. ; cmake --build . ; .\Debug\my_cpp_project.exe
+cd "${HOME}\git\vscode_cpp_cmake_example_project\" ; Remove-Item -Recurse -Verbose -Path .vscode/ ; Remove-Item -Recurse -Verbose -Path build/ ; mkdir build/ ; cd build/ ; cmake .. ; cmake --build . --config Debug; .\Debug\my_cpp_project.exe
 ```
 
 #### Linux - clone & build instructions

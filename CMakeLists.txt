@@ -7,7 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # Enable generation of 'compile_commands.json' file for 'clangd' autocompletion and referencing: Works only with Unix Makefiles generator on Linux platform and Ninja generator for multiple platforms Win11/Linux/macOS
 # TODO add message that with Visual Studio generator the generating the compile_commands.json file isn't supported: only Unix Makefiles or Ninja support generating compile_commands.json file for clangd intellisense
 
-add_executable(my_cpp_project
+set(EXECUTABLE_NAME "my_cpp_project")
+add_executable(${EXECUTABLE_NAME}
     src/main.cpp
 )
 
@@ -39,8 +40,9 @@ set(DEBUG_SESSION_NAME "Start debugging session on ${CMAKE_SYSTEM_NAME} for '${T
 set(VSCODE_DEBUGGER_TYPE "cppdbg")
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows" AND CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(DEBUG_SESSION_NAME "Start debugging session on ${CMAKE_SYSTEM_NAME} for '${EXECUTABLE_NAME}' compiled by ${CMAKE_CXX_COMPILER_ID}")
     set(VSCODE_DEBUGGER_TYPE "cppvsdbg")
-    set(TARGET_BINARY_PATH "${CMAKE_CURRENT_BINARY_DIR}/Debug/${TARGET_NAME}.exe")
+    set(TARGET_BINARY_PATH "${CMAKE_CURRENT_BINARY_DIR}/Debug/${EXECUTABLE_NAME}.exe")
     set(VSCODE_PLATFORM_AND_COMPILER_SPECIFIC_DEBUG_CONFIGURATIONS [=[
 "console": "internalConsole"]=])
 

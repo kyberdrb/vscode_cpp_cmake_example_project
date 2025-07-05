@@ -12,30 +12,39 @@ add_executable(${EXECUTABLE_NAME}
     src/main.cpp
 )
 
-message("Generate 'settings.json' debug configuration for VSCode compatible with ${CMAKE_SYSTEM_NAME} platform")
+message("Generate 'settings.json' debug configuration for VSCode compatible with default toolchaing for ${CMAKE_SYSTEM_NAME} platform")
 
 set(VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set(VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS
-        "\"C_Cpp.intelliSenseEngine\": \"default\", // \"default\" engine has more complete syntax completion, but reports false positive ill-formed code by red-squiggly underline and has higher latency
-    //\"C_Cpp.intelliSenseEngine\": \"Tag Parser\", // \"Tag Parser\" engine has less complete syntax completion (e.g. ranges), but reports no false positives and has lower latency
-    \"C_Cpp.default.cppStandard\": \"c++${CMAKE_CXX_STANDARD}\" // Make the Microsoft's IntelliSense more accurate to find features of specified C++ standard in the standard library for the MSVC compiler"
+    message("Setting up 'Microsoft C/C++' IntelliSense code completion and referencing")
+
+    string(APPEND VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS [=[
+"C_Cpp.intelliSenseEngine": "default", // "default" engine is the updated engine, has more complete syntax completion, but reports false positive ill-formed code by red-squiggly underline and has slightly higher latency
+    //"C_Cpp.intelliSenseEngine": "Tag Parser", // "Tag Parser" engine is the legacy engine, has less complete syntax completion (e.g. for 'ranges'), but reports no false positives and has lower latency
+]=])
+    string(APPEND VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS
+"    \"C_Cpp.default.cppStandard\": \"c++${CMAKE_CXX_STANDARD}\" // Make the Microsoft's IntelliSense more accurate to find features of specified C++ standard in the standard library for the MSVC compiler"
     )
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU") # TODO add macOS & test on it
-    message("Setting up 'clangd' autocompletion and code referencing")
 
-    set(VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS 
-    "\"C_Cpp.intelliSenseEngine\": \"disabled\"") # Disable IntelliSense from Microsoft C/C++ extension in favor of clangd, but only on non-Windows systems
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU") # TODO what 'settings.json' do macOS & BSD need? add conditions and test on these platforms
+    message("Setting up 'clangd' code completion and referencing")
 
+    string(APPEND VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS [=[
+"C_Cpp.intelliSenseEngine": "disabled", // Disable IntelliSense from Microsoft C/C++ extension in favor of clangd, but only on non-Windows systems
+]=])
+    string(APPEND VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS [=[
+    "clangd.arguments": [
+]=])
     get_filename_component(BUILD_DIR_NAME ${CMAKE_BINARY_DIR} NAME)
     string(APPEND VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS
-        ",
-    \"clangd.arguments\": [
-        \"--compile-commands-dir=${BUILD_DIR_NAME}\" // Tell clangd to use compile_commands.json from build directory
-    ]")
+"        \"--compile-commands-dir=${BUILD_DIR_NAME}\" // Tell clangd to use compile_commands.json from build directory\n"
+    )
+    string(APPEND VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS [=[
+    ]]=])
+
 else()
-    message(ERROR: "Unsupported compiler-platform combination: can't generate 'settings.json' debug configuration with ${CMAKE_CXX_COMPILER_ID} compiler on ${CMAKE_SYSTEM_NAME}. Not a platform's default toolchain?")
+    message("ERROR: Unsupported compiler-platform combination: can't generate 'settings.json' debug configuration with ${CMAKE_CXX_COMPILER_ID} compiler on ${CMAKE_SYSTEM_NAME}. Not a platform's default toolchain?")
 endif()
 
 configure_file(settings.json.in ${CMAKE_SOURCE_DIR}/.vscode/settings.json @ONLY)
@@ -68,13 +77,13 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID STREQUAL "G
                 }
             ]]=])
 
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")  # TODO what 'launch.json' do macOS & BSD need? add conditions and test on these platforms
     set(VSCODE_PLATFORM_AND_COMPILER_SPECIFIC_DEBUG_CONFIGURATIONS [=[
 "externalConsole": false,
             "MIMode": "lldb"]=])
 
 else()
-    message(ERROR: "Unsupported compiler-platform combination: can't generate 'launch.json' debug configuration with ${CMAKE_CXX_COMPILER_ID} compiler on ${CMAKE_SYSTEM_NAME}. Not a platform's default toolchain?")
+    message("ERROR: Unsupported compiler-platform combination: can't generate 'launch.json' debug configuration with ${CMAKE_CXX_COMPILER_ID} compiler on ${CMAKE_SYSTEM_NAME}. Not a platform's default toolchain?")
     return()
 endif()
 

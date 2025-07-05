@@ -45,7 +45,48 @@ else()
     message("ERROR: Unsupported compiler-platform combination: can't generate 'settings.json' debug configuration with ${CMAKE_CXX_COMPILER_ID} compiler on ${CMAKE_SYSTEM_NAME}. Not a platform's default toolchain?")
 endif()
 
-configure_file(settings.json.in ${CMAKE_SOURCE_DIR}/.vscode/settings.json @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/settings.json.in ${CMAKE_SOURCE_DIR}/.vscode/settings.json @ONLY)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU") # TODO Do macOS & BSD need '.clangd'? Or will they work with IntelliSense provided by Microsoft C/C++ VSCode extension? Add conditions and test on these platforms
+    message("Configuring '.clangd' for Linux and GCC toolchain")
+
+    get_filename_component(GCC_BIN_DIR ${CMAKE_CXX_COMPILER} DIRECTORY)
+    get_filename_component(GCC_TOOLCHAIN_DIR ${GCC_BIN_DIR} DIRECTORY)
+
+    if(CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES)
+        message("Using CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES for '-isystem'")
+        # Filter for C++ standard library paths
+        foreach(include_dir ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
+            if(include_dir MATCHES "c\\+\\+")
+                string(APPEND CLANGD_SYSTEM_INCLUDES
+                    "    - -isystem${include_dir} # Mark directory as the one containing system headers (suppress warnings)\n"
+                )
+            endif()
+        endforeach()
+    else()
+        message("Using predefined constructed paths for '-isystem'")
+        # Fallback to constructed paths
+        execute_process(
+            COMMAND ${CMAKE_CXX_COMPILER} -dumpversion
+            OUTPUT_VARIABLE GCC_VERSION
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        set(CLANGD_GCC_INCLUDE_DIR "${GCC_TOOLCHAIN_DIR}/include/c++/${GCC_VERSION}")
+
+        execute_process(
+            COMMAND ${CMAKE_CXX_COMPILER} -dumpmachine
+            OUTPUT_VARIABLE GCC_TARGET_TRIPLET
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        set(CLANGD_GCC_TARGET_INCLUDE_DIR "${GCC_TOOLCHAIN_DIR}/include/c++/${GCC_VERSION}/${GCC_TARGET_TRIPLET}")
+        set(CLANGD_SYSTEM_INCLUDES
+"    - -isystem${CLANGD_GCC_INCLUDE_DIR} # Mark directory as the one containing system headers (suppress warnings)
+    - -isystem${CLANGD_GCC_TARGET_INCLUDE_DIR} # Mark directory as the one containing system headers (suppress warnings)"
+        )
+    endif()
+
+    configure_file(${CMAKE_SOURCE_DIR}/clangd.in ${CMAKE_SOURCE_DIR}/.clangd @ONLY)
+endif()
 
 message("Generate 'launch.json' with debug configuration for VSCode, compatible with '${CMAKE_SYSTEM_NAME}' platform and '${CMAKE_CXX_COMPILER_ID}' compiler (assuming that this is the default toolchain for the platform)")
 set(DEBUG_SESSION_NAME "Start debugging session on ${CMAKE_SYSTEM_NAME} for '${EXECUTABLE_NAME}' compiled by ${CMAKE_CXX_COMPILER_ID}")
@@ -85,7 +126,6 @@ else()
     return()
 endif()
 
-configure_file(launch.json.in ${CMAKE_SOURCE_DIR}/.vscode/launch.json @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/launch.json.in ${CMAKE_SOURCE_DIR}/.vscode/launch.json @ONLY)
 
-# TODO generate '.clangd', but only if on Linux & GNU/GCC
 # TODO test on macOS and FreeBSD

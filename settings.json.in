@@ -1,5 +1,7 @@
 {
-    // If whitespacecs aren't rendered, save [Ctrl+S] the settings.json file again
+    // If whitespacecs aren't rendered in VSCode,
+    //  or debug configuration in 'launch.json' isn't detected by 'Microsoft C/C++' VSCode extension,
+    //  save [Ctrl+S] the settings.json file again
     "editor.renderWhitespace": "all",
 
     "files.associations": {

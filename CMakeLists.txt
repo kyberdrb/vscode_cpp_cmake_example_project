@@ -14,8 +14,6 @@ add_executable(${EXECUTABLE_NAME}
 
 message("Generate 'settings.json' debug configuration for VSCode compatible with default toolchaing for ${CMAKE_SYSTEM_NAME} platform")
 
-set(VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS)
-
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     message("Setting up 'Microsoft C/C++' IntelliSense code completion and referencing")
 

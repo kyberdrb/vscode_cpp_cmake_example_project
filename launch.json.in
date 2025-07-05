@@ -1,3 +1,5 @@
+// If the debug configuration in 'launch.json' isn't detected by 'Microsoft C/C++' VSCode extension,
+//  save [Ctrl+S] this file again
 {
     "version": "0.2.0",
     "configurations": [

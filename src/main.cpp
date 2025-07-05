@@ -200,5 +200,12 @@ int main() {
 
     std::println("EOF");
 
+    // Uncomment to test (integrated VSCode) terminal input
+    //  to verify potential restrictions due to warning when launching debug session
+    //    &"warning: GDB: Failed to set controlling terminal: Operation not permitted\n"
+    //int num{};
+    //std::cin >> num;
+    //std::println("{}", num);
+
     return 0;
 }

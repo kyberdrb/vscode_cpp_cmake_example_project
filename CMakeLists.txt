@@ -14,34 +14,28 @@ add_executable(${EXECUTABLE_NAME}
 
 message("Generate 'settings.json' debug configuration for VSCode compatible with ${CMAKE_SYSTEM_NAME} platform")
 
+set(VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS)
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set(VSCODE_MICROSOFT_CPP_EXTENSION_PLATFORM_SPECIFIC_INTELLISENSE_STATE
+    set(VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS
         "\"C_Cpp.intelliSenseEngine\": \"default\", // \"default\" engine has more complete syntax completion, but reports false positive ill-formed code by red-squiggly underline and has higher latency
     //\"C_Cpp.intelliSenseEngine\": \"Tag Parser\", // \"Tag Parser\" engine has less complete syntax completion (e.g. ranges), but reports no false positives and has lower latency
     \"C_Cpp.default.cppStandard\": \"c++${CMAKE_CXX_STANDARD}\" // Make the Microsoft's IntelliSense more accurate to find features of specified C++ standard in the standard library for the MSVC compiler"
     )
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU") # TODO add macOS & test on it
-    set(VSCODE_MICROSOFT_CPP_EXTENSION_PLATFORM_SPECIFIC_INTELLISENSE_STATE
+    message("Setting up 'clangd' autocompletion and code referencing")
+
+    set(VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS 
     "\"C_Cpp.intelliSenseEngine\": \"disabled\"") # Disable IntelliSense from Microsoft C/C++ extension in favor of clangd, but only on non-Windows systems
-else()
-    message(ERROR: "Unsupported compiler-platform combination: can't generate 'settings.json' debug configuration with ${CMAKE_CXX_COMPILER_ID} compiler on ${CMAKE_SYSTEM_NAME}. Not a platform's default toolchain?")
-endif()
 
-set(VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS
-    ${VSCODE_MICROSOFT_CPP_EXTENSION_PLATFORM_SPECIFIC_INTELLISENSE_STATE})
-
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     get_filename_component(BUILD_DIR_NAME ${CMAKE_BINARY_DIR} NAME)
-    set(CLANGD_CONFIGURATION
+    string(APPEND VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS
         ",
     \"clangd.arguments\": [
         \"--compile-commands-dir=${BUILD_DIR_NAME}\" // Tell clangd to use compile_commands.json from build directory
     ]")
-
-    string( APPEND
-        VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS
-        ${CLANGD_CONFIGURATION}
-)
+else()
+    message(ERROR: "Unsupported compiler-platform combination: can't generate 'settings.json' debug configuration with ${CMAKE_CXX_COMPILER_ID} compiler on ${CMAKE_SYSTEM_NAME}. Not a platform's default toolchain?")
 endif()
 
 configure_file(settings.json.in ${CMAKE_SOURCE_DIR}/.vscode/settings.json @ONLY)

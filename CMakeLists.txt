@@ -26,8 +26,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND CMAKE_CXX_COMPILER_ID STREQUAL "MSVC
     )
 
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU") # TODO what 'settings.json' do macOS & BSD need? add conditions and test on these platforms
-    message("Setting up 'clangd' code completion and referencing")
-
     string(APPEND VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS [=[
 "C_Cpp.intelliSenseEngine": "disabled", // Disable IntelliSense from Microsoft C/C++ extension in favor of clangd, but only on non-Windows systems
 ]=])
@@ -40,6 +38,9 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID STREQUAL "GN
     )
     string(APPEND VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS [=[
     ]]=])
+
+    message("Setting up 'clangd' code completion and referencing")
+    # TODO generate '.clangd' config file without 'clangd.in'
 
 else()
     message("ERROR: Unsupported compiler-platform combination: can't generate 'settings.json' debug configuration with ${CMAKE_CXX_COMPILER_ID} compiler on ${CMAKE_SYSTEM_NAME}. Not a platform's default toolchain?")

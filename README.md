@@ -28,15 +28,20 @@ Click on the operating system you want to build the project on, to jump to the p
 
 Install following tools:
 
-- [Visual Studio 2022 Community](https://visualstudio.microsoft.com/vs/community/) - provides the MSVC compiler, _Visual Studio 17 2022_ makefile generator for CMake, CMake build system utilities and _Developer PowerShell for VS 2022_ (which isn't included in _Build Tools for Visual Studio_ unfortunately, therefore we're installing the entire Visual Studio IDE).
-    - Install Visual Studio 2022 Community IDE. Open _Visual Studio Installer_, where you choose following components for download and installation:
+- [Visual Studio 2022 Community](https://visualstudio.microsoft.com/vs/community/) - provides
+    - MSVC compiler, 
+    - _Visual Studio 17 2022_ makefile generator for CMake,
+    - CMake build system utilities and _Developer PowerShell for VS 2022_ (which isn't included in _Build Tools for Visual Studio_ unfortunately, therefore we're installing the entire Visual Studio IDE).
     
-        **_Core Components:_**
+    Install Visual Studio 2022 Community IDE. Open _Visual Studio Installer_, where you choose following components for download and installation:
+    
+    **_Core Components:_**
 
-        - MSVC Compiler Toolchain in latest version (at the time of writing it's v143) in both variants: with and without Spectre/Meltdown mitigations
-        - Windows SDK (Windows 11 24H2 uses `Windows SDK version 10.0.22621.0 to target Windows 10.0.26100` as seen in the CMake generate output)
-        - C++ Core Features (includes standard library implementations)
-        - CMake tools for Windows
+    - MSVC Compiler Toolchain in latest version (at the time of writing it's v143) in both variants: with and without Spectre/Meltdown mitigations
+    - Windows SDK (Windows 11 24H2 uses `Windows SDK version 10.0.22621.0 to target Windows 10.0.26100` as seen in the CMake generate output)
+    - C++ Core Features (includes standard library implementations)
+    - CMake tools for Windows
+
 - [git](https://git-scm.com/downloads/win) - _git_ version control system
     - Install with default settings.
 
@@ -75,14 +80,119 @@ All these packages might be contained in one metapackage `build-essentials` , th
 
 Install following tools
 
-- [Xcode](https://apps.apple.com/us/app/xcode/id497799835?mt=12/) - provides Apple Clang compiler, _Xcode_ makefile generator and Xcode Command Line Tools
+- [Developer tools: git, clang](https://apps.apple.com/us/app/xcode/id497799835?mt=12/) - provides Apple Clang compiler, _Xcode_ makefile generator and Xcode Command Line Tools
     - Xcode Command Line Tools Requires macOS debugging requires `LLDB.framework`, which can be obtained by installing:
 
         ```sh
         xcode-select --install
+        #output: xcode-select: note: install requested for command line developer tools
         ```
 
-- [CMake](https://github.com/Kitware/CMake/releases/download/v4.0.1/cmake-4.0.1-macos10.10-universal.dmg) - provides CMake build system utilities
+        which opens a dialog window: press `Confirm` and `Agree` in the dialog pop-ups to begin installation. Be patient, it might take a while.
+
+        After installation has finished, check version of installed utilities (to date 2025/11/02)
+
+        ```sh
+        git --version
+        #output: git version 2.30.1 (Apple Git-130)
+        
+        clang --version
+        #output:
+        #Apple clang version 12.0.5 (clang-1205.0.22.11)
+        #Target: x86_64-apple-darwin20.6.0
+        #Thread model: posix
+        #InstalledDir: /Library/Developer/CommandLineTools/usr/bin
+        ```
+
+- [CMake](https://cmake.org/download/#latest) or [direct link](https://github.com/Kitware/CMake/releases/latest) - look for `cmake-<VERSION>-macos-universal.dmg` provides CMake build system utilities
+
+    ```sh
+    # --- Download CMake installer
+
+    CMAKE_URL_MAC="$(curl --silent https://api.github.com/repos/Kitware/CMake/releases/latest | grep "browser_download_url.*macos-universal.dmg" | cut -d " -f 4)"
+    echo "${CMAKE_URL_MAC}"
+
+    CMAKE_DOWNLOADED_FILE_MAC="$(echo ${CMAKE_URL_MAC} | cut -d / -f 9)"
+    echo "${CMAKE_DOWNLOADED_FILE_MAC}"
+
+    echo ${TMPDIR}
+    curl --location --output "${TMPDIR}/${CMAKE_DOWNLOADED_FILE_MAC}" "${CMAKE_URL_MAC}"
+    ls -l "${TMPDIR}/${CMAKE_DOWNLOADED_FILE_MAC}"
+
+    # --- Download hashes file for integrity validation of the installer
+
+    CMAKE_URL_HASHES="$(curl --silent https://api.github.com/repos/Kitware/CMake/releases/latest | grep "browser_download_url.*SHA-256\.txt\"" | cut -d \" -f 4)"
+    echo "${CMAKE_URL_HASHES}"
+
+    CMAKE_DOWNLOADED_HASHES="$(echo ${CMAKE_URL_HASHES} | cut -d / -f 9)"
+    echo "${CMAKE_DOWNLOADED_HASHES}"
+
+    curl --location --output "${TMPDIR}/${CMAKE_DOWNLOADED_HASHES}" "${CMAKE_URL_HASHES}"
+    ls -l "${TMPDIR}/${CMAKE_DOWNLOADED_HASHES}"
+
+    # --- Verify integrity of the installer
+
+    CMAKE_DOWNLOADED_FILE_MAC_HASH="$(shasum --algorithm 256 "${TMPDIR}/${CMAKE_DOWNLOADED_FILE_MAC}")"
+    echo "${CMAKE_DOWNLOADED_FILE_MAC_HASH}"
+
+    CMAKE_DOWNLOADED_FILE_MAC_HASH_ACTUAL="$(echo "${CMAKE_DOWNLOADED_FILE_MAC_HASH}" | cut -d ' ' -f 1)"
+    echo "${CMAKE_DOWNLOADED_FILE_MAC_HASH_ACTUAL}"
+
+    echo "${CMAKE_DOWNLOADED_FILE_MAC}"
+    grep "${CMAKE_DOWNLOADED_FILE_MAC_HASH_ACTUAL}" "${TMPDIR}/${CMAKE_DOWNLOADED_HASHES}" | grep "${CMAKE_DOWNLOADED_FILE_MAC}"
+    echo $?
+    #0
+
+    grep "${CMAKE_DOWNLOADED_FILE_MAC_HASH_ACTUAL}" "${TMPDIR}/${CMAKE_DOWNLOADED_HASHES}" | grep "${CMAKE_DOWNLOADED_FILE_MAC}-"
+    echo $?
+    #1
+
+    grep "${CMAKE_DOWNLOADED_FILE_MAC_HASH_ACTUAL}" "${TMPDIR}/${CMAKE_DOWNLOADED_HASHES}" | grep "${CMAKE_DOWNLOADED_FILE_MAC}"
+    echo $?
+    #0
+
+    if [ $? -ne 0 ]; then
+        echo "WARNING: CMake installer file corrupted. Redownload the file."
+    else
+        echo "OK: Expected and actual checksums are matching: installer file approved and legitimate. Running installer..."
+        open "${TMPDIR}/${CMAKE_DOWNLOADED_FILE_MAC}"
+    fi
+
+    # --- Make CMake accessible from the Terminal, not only the CMake GUI app
+
+    PATH_WITH_CMAKE='export PATH="/Applications/CMake.app/Contents/bin:$PATH"'
+    echo "${PATH_WITH_CMAKE}"
+    if grep --line-regexp --fixed-strings "${PATH_WITH_CMAKE}" ~/.zshrc; then
+        echo "CMake path already present in ~/.zshrc"
+    else
+        echo "${PATH_WITH_CMAKE}" >> ~/.zshrc
+        echo "CMake path added to ~/.zshrc"
+    fi
+    ```
+
+    A Finder window will open with mounted CMake installer image. Drag the CMake app to the Application directory shortcut.
+
+    ![](res/cmake_install_macos.png)
+
+    Then open a new tab in Terminal [`Option` + `T`] and verify that CMake utility is accessible.
+
+    ```sh
+    echo ${PATH}
+    #output:/Applications/CMake.app/Contents/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+
+    cmake --version
+    #output:
+    #cmake version 4.1.2
+    #
+    #CMake suite maintained and supported by Kitware (kitware.com/cmake)
+    ```
+
+- `git` - will be installed with the `Xcode` command
+    - when opening _Terminal_ and typing `git` and confirming by `Enter`, when neither Xcode, nor git is installed, it will output
+
+        ```
+        xcode-select: note: no developer tools were found at '/Applications/Xcode.app', requesting install. Choose an option in the dialog to download the command line developer tools.
+        ```
 
 ### VSCode Extensions
 

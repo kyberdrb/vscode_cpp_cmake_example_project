@@ -74,7 +74,14 @@ Install packages that contain these utilities which provide following functional
 - `cmake` - CMake metamakefiles generator
 - `git` - _git_ version control system
 
-All these packages might be contained in one metapackage `build-essentials` , that might be available for your Linux distribution. For brewity and simplicity of this tutorial, I'll leave that for you as a homework, how to install the toolchain
+All these packages might be contained in one metapackage `build-essentials` , that might be available for your Linux distribution. For brewity and simplicity of this tutorial, I'll leave that for you as a homework, how to install the toolchain. Here are the commands for most used Linux distributions:
+
+- Arch Linux: `sudo pacman -Sy gcc make cmake git`
+- Ubuntu: `sudo apt-get install TODO`
+- Debian: `sudo apt-get install TODO`
+- Fedora: `sudo dnf TODO`
+- Oracle Linux: `sudo dnf TODO`
+- OpenSuse: `sudo zypper TODO`
 
 ### macOS - tools installation
 
@@ -104,71 +111,16 @@ Install following tools
         #InstalledDir: /Library/Developer/CommandLineTools/usr/bin
         ```
 
-- [CMake](https://cmake.org/download/#latest) or [direct link](https://github.com/Kitware/CMake/releases/latest) - look for `cmake-<VERSION>-macos-universal.dmg` provides CMake build system utilities
+- [CMake](https://cmake.org/download/#latest) or [direct link](https://github.com/Kitware/CMake/releases/latest) - download manually :look for `cmake-<VERSION>-macos-universal.dmg` provides CMake build system utilities.  
+Or download automatically via script:
 
     ```sh
-    # --- Download CMake installer
-
-    CMAKE_URL_MAC="$(curl --silent https://api.github.com/repos/Kitware/CMake/releases/latest | grep "browser_download_url.*macos-universal.dmg" | cut -d " -f 4)"
-    echo "${CMAKE_URL_MAC}"
-
-    CMAKE_DOWNLOADED_FILE_MAC="$(echo ${CMAKE_URL_MAC} | cut -d / -f 9)"
-    echo "${CMAKE_DOWNLOADED_FILE_MAC}"
-
-    echo ${TMPDIR}
-    curl --location --output "${TMPDIR}/${CMAKE_DOWNLOADED_FILE_MAC}" "${CMAKE_URL_MAC}"
-    ls -l "${TMPDIR}/${CMAKE_DOWNLOADED_FILE_MAC}"
-
-    # --- Download hashes file for integrity validation of the installer
-
-    CMAKE_URL_HASHES="$(curl --silent https://api.github.com/repos/Kitware/CMake/releases/latest | grep "browser_download_url.*SHA-256\.txt\"" | cut -d \" -f 4)"
-    echo "${CMAKE_URL_HASHES}"
-
-    CMAKE_DOWNLOADED_HASHES="$(echo ${CMAKE_URL_HASHES} | cut -d / -f 9)"
-    echo "${CMAKE_DOWNLOADED_HASHES}"
-
-    curl --location --output "${TMPDIR}/${CMAKE_DOWNLOADED_HASHES}" "${CMAKE_URL_HASHES}"
-    ls -l "${TMPDIR}/${CMAKE_DOWNLOADED_HASHES}"
-
-    # --- Verify integrity of the installer
-
-    CMAKE_DOWNLOADED_FILE_MAC_HASH="$(shasum --algorithm 256 "${TMPDIR}/${CMAKE_DOWNLOADED_FILE_MAC}")"
-    echo "${CMAKE_DOWNLOADED_FILE_MAC_HASH}"
-
-    CMAKE_DOWNLOADED_FILE_MAC_HASH_ACTUAL="$(echo "${CMAKE_DOWNLOADED_FILE_MAC_HASH}" | cut -d ' ' -f 1)"
-    echo "${CMAKE_DOWNLOADED_FILE_MAC_HASH_ACTUAL}"
-
-    echo "${CMAKE_DOWNLOADED_FILE_MAC}"
-    grep "${CMAKE_DOWNLOADED_FILE_MAC_HASH_ACTUAL}" "${TMPDIR}/${CMAKE_DOWNLOADED_HASHES}" | grep "${CMAKE_DOWNLOADED_FILE_MAC}"
-    echo $?
-    #0
-
-    grep "${CMAKE_DOWNLOADED_FILE_MAC_HASH_ACTUAL}" "${TMPDIR}/${CMAKE_DOWNLOADED_HASHES}" | grep "${CMAKE_DOWNLOADED_FILE_MAC}-"
-    echo $?
-    #1
-
-    grep "${CMAKE_DOWNLOADED_FILE_MAC_HASH_ACTUAL}" "${TMPDIR}/${CMAKE_DOWNLOADED_HASHES}" | grep "${CMAKE_DOWNLOADED_FILE_MAC}"
-    echo $?
-    #0
-
-    if [ $? -ne 0 ]; then
-        echo "WARNING: CMake installer file corrupted. Redownload the file."
-    else
-        echo "OK: Expected and actual checksums are matching: installer file approved and legitimate. Running installer..."
-        open "${TMPDIR}/${CMAKE_DOWNLOADED_FILE_MAC}"
-    fi
-
-    # --- Make CMake accessible from the Terminal, not only the CMake GUI app
-
-    PATH_WITH_CMAKE='export PATH="/Applications/CMake.app/Contents/bin:$PATH"'
-    echo "${PATH_WITH_CMAKE}"
-    if grep --line-regexp --fixed-strings "${PATH_WITH_CMAKE}" ~/.zshrc; then
-        echo "CMake path already present in ~/.zshrc"
-    else
-        echo "${PATH_WITH_CMAKE}" >> ~/.zshrc
-        echo "CMake path added to ~/.zshrc"
-    fi
+    cd vscode_cpp_cmake_example_project/
+    ./install_CMake_on_macOS.sh
     ```
+
+    _Note to other platforms:_  
+    Windows 11 doesn't need this script by default as CMake is installed together as a component alongside Visual Studio. Linux and BSD distributions can install CMake via a package manager. Only macOS needs a script for handling CMake installation, as it isn't shipped with XCode build tools, and handling installation via `homebrew` would be overwhelming overkill for a newcomer to C++ development.
 
     A Finder window will open with mounted CMake installer image. Drag the CMake app to the Application directory shortcut.
 
@@ -187,6 +139,8 @@ Install following tools
     #CMake suite maintained and supported by Kitware (kitware.com/cmake)
     ```
 
+    After installation/copying of the CMake executable to the _Applications_ directory, you can close the Finder window and the automatically opened window upon mounting the CMake dmg file, and unmount the CMake dmg disk on Desktop
+
 - `git` - will be installed with the `Xcode` command
     - when opening _Terminal_ and typing `git` and confirming by `Enter`, when neither Xcode, nor git is installed, it will output
 
@@ -196,7 +150,7 @@ Install following tools
 
 ### VSCode Extensions
 
-**_VSCode extensions for Windows_**
+**_VSCode extensions for Windows and macOS_**
 
 ![](res/vscode_extensions-windows.png)
 
@@ -210,7 +164,7 @@ Install following tools
     - adds support for CMake syntax completion & highlighting
     - installs `CMake` [twxs] extension alongside with the main extension, but since version ~1.21.13 it's no longer needed, thus can be disabled - for syntax completion and referencing
 - **_[Linux only!]_** [`clangd`](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) from _LLVM_
-    - optional; adds support for syntax completion - `clangd` completion seems to me to be more reliable on Linux platform than default Intellisense from Microsoft's `C/C++` extension; maybe on macOS it works the same way. Maybe not on all Linux distributions, but I use it in VSCode on Arch Linux.
+    - adds support for syntax completion - `clangd` completion seems to me to be more reliable on Linux platform than default IntelliSense from Microsoft's `C/C++` extension. Tested on Arch Linux
 
 ### Build instructions - The Path of Least Resistance
 
@@ -309,21 +263,79 @@ cmake --build .
 date && cd "${HOME}/git/vscode_cpp_cmake_example_project/build-Debug" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . && ./my_cpp_project
 
 # Rebuild i.e. clean & build
-date && cd "${HOME}/git/kyberdrb/vscode_cpp_cmake_minimal_project/" && rm --recursive --verbose .vscode/ && rm --recursive --verbose build-Debug/ && mkdir build-Debug/ && cd "build-Debug/" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . && ./my_cpp_project
+date && cd "${HOME}/git/vscode_cpp_cmake_example_project/" && rm --recursive --verbose .vscode/ && rm --recursive --verbose build-Debug/ && mkdir build-Debug/ && cd "build-Debug/" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . && ./my_cpp_project
 ```
 
 #### macOS - clone & build instructions
 
 Open _Terminal_
 
-```
-TODO build commands
+```sh
+cd "${HOME}"
+mkdir git
+cd git
+git clone https://github.com/kyberdrb/vscode_cpp_cmake_example_project.git
+cd vscode_cpp_cmake_example_project
+
+rm -rv .vscode/
+rm -rv build-Debug/
+
+mkdir build-Debug
+cd build-Debug
+
+ls ..
+cmake -DCMAKE_BUILD_TYPE=Debug .. # a little more complex than 'cmake ..' (which builds a Release version of the binary by default) but the option '-DCMAKE_BUILD_TYPE=Debug' adds debug information into the executable, making it debuggable with 'F5' found under 'Run & Debug' (Ctrl + Shift + D) on the side menu, so the program execution actually hangs on active breakpoints
+
+ls
+cmake --build .
+
+./my_cpp_project
+
+# Check whether the binary is debuggable, i. e. the Debug version of the binary had been configured
+dsymutil my_cpp_project
+
+# If you see this message:
+#    warning: no debug symbols in executable (-arch x86_64)
+# the binary was most likely been configured with the default, Release, version, most likely without specified build variant by
+#   cmake ..
+# Rerun the CMake configure command again with specified Debug variant as
+#.   cmake -DCMAKE_BUILD_TYPE=Debug ..
+# and build the binary afterwards
+#.   cmake --build .
+# and check for debugging symbols in the binary again
+#.   dsymutil my_cpp_project
+# expected output:
+#.   <no output>
+
+# Check binary for integrity
+dwarfdump --verify my_cpp_project
+#Verifying my_cpp_project:	file format Mach-O 64-bit x86-64
+#Verifying .debug_abbrev...
+#Verifying .debug_info Unit Header Chain...
+#Verifying .debug_types Unit Header Chain...
+#No errors.
+
+# Check debug symbols: '-a': Display all symmbol table entries, including those inserted for use by debuggers.
+echo "Total symbols: $(nm -a my_cpp_project | wc -l)"
+echo "Debug symbols: $(nm -a my_cpp_project | grep ' - ' | wc -l)"
+# Debug version
+#    Total symbols:     2736
+#    Debug symbols:     2115
+# Release version
+#    Total symbols:      621
+#    Debug symbols:        0
 ```
 
 ##### Incremental build
 
-```
-TODO build command
+**_One-liners:_**
+
+```sh
+# Build
+date && cd "${HOME}/git/vscode_cpp_cmake_example_project/build-Debug" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . && ./my_cpp_project
+
+# Rebuild i.e. clean & build
+date && cd "${HOME}/git/vscode_cpp_cmake_example_project/" && rm -rv .vscode/ && rm -rv build-Debug/ && mkdir build-Debug/ && cd "build-Debug/" && cmake -DCMAKE_BUILD_TYPE=Debug .. && cmake --build . && ./my_cpp_project
 ```
 
 ### Making Changes
@@ -335,9 +347,18 @@ Command for running the compiled executable normally - without debugging - is li
 
 Debugging sessions can be configured and launched in _Run & Debug_ (`Ctrl + Shift + D`) extension pane on the left hand side. At the top of the pane, select the debugging session by your platform, i.e. operating system: these options are configured in `launch.json` . In the `main.cpp` click on the line numbers you want to stop the program's execution and introspect the variable values. Then start the debugging session by clicking on the green triangle or by pressing `F5` .
 
+#### Note for macOS
+
+When debugging executable for the first time after reboot, the system might prompt you to enter password of current user account to proceed.
+
+![](res/macOS_first_debug_prompt.png)
+
+After entering the password, the debugger might set up LLDB and Python, then it immediately attaches to the binary.
+
 ## VSCode Project configuration
 
 - settings.json
+- launch.json
 - .clangd
 
 ## Build Instructions - The Path of Ninja - Advanced Guide

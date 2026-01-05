@@ -3,6 +3,11 @@ cmake_minimum_required(VERSION 3.10)
 project(MyCppProject VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 23)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") # Tested on macOS Big Sur 11.7.1
+    set(CMAKE_CXX_STANDARD 20)
+    message(STATUS "AppleClang detected - using C++20 (limited support)")
+endif()
+
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # Enable generation of 'compile_commands.json' file for 'clangd' autocompletion and referencing: Works only with Unix Makefiles generator on Linux platform and Ninja generator for multiple platforms Win11/Linux/macOS
 # TODO add message that with Visual Studio generator the generating the compile_commands.json file isn't supported: only Unix Makefiles or Ninja support generating compile_commands.json file for clangd intellisense
@@ -25,7 +30,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND CMAKE_CXX_COMPILER_ID STREQUAL "MSVC
 "    \"C_Cpp.default.cppStandard\": \"c++${CMAKE_CXX_STANDARD}\" // Make the Microsoft's IntelliSense more accurate to find features of specified C++ standard in the standard library for the MSVC compiler"
     )
 
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU") # TODO what 'settings.json' do macOS & BSD need? add conditions and test on these platforms
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     string(APPEND VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS [=[
 "C_Cpp.intelliSenseEngine": "disabled", // Disable IntelliSense from Microsoft C/C++ extension in favor of clangd, but only on non-Windows systems
 ]=])
@@ -39,8 +44,17 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID STREQUAL "GN
     string(APPEND VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS [=[
     ]]=])
 
-    message("Setting up 'clangd' code completion and referencing")
-    # TODO generate '.clangd' config file without 'clangd.in'
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+    message("Setting up 'Microsoft C/C++' IntelliSense code completion and referencing for macOS")
+
+    string(APPEND VSCODE_ENVIRONMENT_PLATFORM_AND_COMPILER_SPECIFIC_CONFIGURATIONS [=[
+"C_Cpp.intelliSenseEngine": "default", // "default" engine (modern) is sufficient for macOS IntelliSense to work fully
+    //"C_Cpp.intelliSenseEngine": "Tag Parser", // "Tag Parser" engine (legacy) might produce different results; mentioned for reference as a fallback
+]=])
+
+# TODO add support for IntelliSense: syntax highlighting/completion/referencing/type deduction (strong type, auto, templated types)
+#   elseif(CMAKE_SYSTEM_NAME MATCHES "FreeBSD" AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang") # matches FreeBSD specifically, rejects all other BSD distros
+#   elseif(CMAKE_SYSTEM_NAME MATCHES "BSD$" AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang").   # matches any BSD distribution -> PREFERRED !!!
 
 else()
     message("ERROR: Unsupported compiler-platform combination: can't generate 'settings.json' debug configuration with ${CMAKE_CXX_COMPILER_ID} compiler on ${CMAKE_SYSTEM_NAME}. Not a platform's default toolchain?")

@@ -34,7 +34,7 @@ Install following tools:
     - CMake build system utilities and _Developer PowerShell for VS 2022_ (which isn't included in _Build Tools for Visual Studio_ unfortunately, therefore we're installing the entire Visual Studio IDE).
     
     Install Visual Studio 2022 Community IDE. Open _Visual Studio Installer_, where you choose following components for download and installation:
-    
+
     **_Core Components:_**
 
     - MSVC Compiler Toolchain in latest version (at the time of writing it's v143) in both variants: with and without Spectre/Meltdown mitigations
@@ -55,15 +55,34 @@ git version 2.49.0.windows.1
 
 everything is set up correctly, and we can proceed with building the project.
 
-Otherwise it's needed put the binary directory in the system `Path` variable.
+Otherwise it's needed put the binary directory in the system `Path` variable.  
+Execute these commands in Git Bash (launch normally, as user, with regular permissions)
+
+```sh
+cd "${HOME}"/git/vscode_cpp_cmake_example_project
+./utils/add_git_to_path-windows.sh
+```
+
+The script verifies whether the Git path is already present in system `Path` variable (system environment) and user `Path` variable (user environment) [two separate variables with the same name], to avoid adding a duplicate path to user environment, which may cause version clashes/shadowing, when Git path is present in system environment `Path` variable - user environment has precedence. If the path is not present anywhere, the script then adds the Git path to the `Path` variable in user environment.
+
+Verify the presence of the path to Git binary manually:
 
 1. Open Windows Settings (e.g. Win+X -> Settings) -> System -> About -> Advanced system settings . A dialog window _System Properties_ opens.
 1. In the _System Properties_ dialog window click on tab _Advanced_ -> click on _Environment Variables_ button. A dialog window _Environment Variables_ opens.
-1. In the _Environment Variables_ dialog window In section _System variables_ find variable `Path` . Double click on it. A dialog window _Edit environment variable opens_.
-1. In the _Edit environment variable opens_ dialog window click on _New_ button. A new line at the bottom in the list of paths is created. Assuming the git is installed to the default path `C:\Program Files\Git`, enter in the line the `cmd` directory in it, where the `git.exe` is located - `C:\Program Files\Git\cmd` [note the absence of the trailing backslash!] . Confirm all dialog windows by clicking on _OK_ button.
-1. Open a new _Developer PowerShell for VS 2022_ window and test the `git --version` command again. Now the terminal will recognize the `git` as a valid command and outputs the currently installed git version as noted above.
 
-Continue with [building the project](#windows-11---clone--build-instructions).
+1. In the _Environment Variables_ dialog window In section _System variables_ find variable `Path` . Double click on it. A dialog window _Edit environment variable opens_ - see picture below.
+    - Read the path entries one-by-one, looking for path `C:\Program Files\Git\cmd`. If it's present, then launching the `add_git_to_path-windows.sh` is unnecessary: current user and all future users have access to the `git.exe` binary in all terminal emulators.
+
+    ![cmd with script output + sys Path var present; user Path var not added](res/git_cmd_present_in_sys_env_path_var-git_not_added.png)
+
+1. If the Git path isn't in the _System variables_, check the `Path` variable in section _User variables for <PROFILE_NAME>_ the same way - see picture below. If the `Path` variable has the entry matching the Git path, the `git.exe` binary is available for all terminal emulators exclusivelly for the current user.
+
+    ![cmd with script output + sys Path var not present; user Path var added](res/git_cmd_not_present_in_sys_env_path_var-git_added_to_user_path.png)
+
+1. If the Git path isn't even in the `Path` variable in the section _User variables for <PROFILE_NAME>_, then the script `add_git_to_path-windows.sh` hasn't done its job, and the Git path needs to be added manually.
+
+    1. In the _Edit environment variable opens_ dialog window click on _New_ button. A new line at the bottom in the list of paths is created. Assuming the git is installed to the default path `C:\Program Files\Git`, enter in the line the `cmd` directory in it, where the `git.exe` is located - `C:\Program Files\Git\cmd` [note the absence of the trailing backslash!] . Confirm all dialog windows by clicking on _OK_ button.
+    1. Open a new _Developer PowerShell for VS 2022_ window and test the `git --version` command again. Now the terminal will recognize the `git` as a valid command and outputs the currently installed git version as noted above.
 
 ### Linux - tools installation
 

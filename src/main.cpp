@@ -300,7 +300,11 @@ void test_structured_binding_initialization() {
 
 int main() {
     static constexpr int number = 42;
-    std::cout << "Hello, VS Code + CMake + clangd!" << std::endl;
+    std::cout << "Hello, VS Code + CMake";
+#ifndef _MSC_VER
+    std::cout << " + clangd!";
+#endif
+    std::cout << std::endl;
     std::cout << number << std::endl;
 
     test_initialization_styles();
